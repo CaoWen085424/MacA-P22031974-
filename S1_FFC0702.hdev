@@ -1,0 +1,923 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="20.11.1.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_get_window (WindowHandle)</l>
+<l>dev_set_draw ('margin')</l>
+<l>dev_set_color ('blue')</l>
+<l>dev_set_line_width (3)</l>
+<c></c>
+<c>**********************************************************************************</c>
+<c>*AlbedoFFC</c>
+<c>**********************************************************************************</c>
+<l>ImagesFold3:='D:/S1_Images/黑线做FFC/2Albedo'</l>
+<l>list_image_files (ImagesFold3, 'default', [], ImageFiles)</l>
+<l>ImgNum:=|ImageFiles|</l>
+<l>read_image (Albedos, ImageFiles)</l>
+<c>****</c>
+<l>get_image_size (Albedos, Width, Height)</l>
+<l>gen_image_const (ImageAlbedo, 'byte', Width[0], Height[0])</l>
+<l>count_obj (Albedos, ImgNum)</l>
+<l>for Index:=1 to ImgNum by 1</l>
+<l>    select_obj (Albedos, Albedo, Index)</l>
+<l>    median_image (Albedo, ImageMedian, 'circle', 6, 'mirrored')</l>
+<l>    max_image (ImageAlbedo, ImageMedian, ImageAlbedo)</l>
+<l>*     dev_display (Image)</l>
+<l>*     stop ()</l>
+<l>endfor</l>
+<l>* mean_image (Image, ImageMean, 9, 9)</l>
+<l>scale_image_range (ImageAlbedo, ImageScaled, 90, 150)</l>
+<c>**********************************</c>
+<l>threshold (ImageAlbedo, ROI1, 69, 255)</l>
+<l>ImageH:=Height[0]</l>
+<l>ImageW:=Width[0]</l>
+<l>Step:=800</l>
+<l>tuple_gen_sequence (0, ImageW-1, Step, ColSeq)</l>
+<l>gen_rectangle1 (Rectangle, ColSeq-ColSeq+1000, ColSeq, ColSeq-ColSeq+ImageH*0.25-1, ColSeq+Step)</l>
+<l>erosion_circle (ROI1, ROI, 5)</l>
+<l>intersection (Rectangle, ROI, ROIRectangle)</l>
+<l>intensity (ROIRectangle, ImageAlbedo, Mean, Deviation)</l>
+<l>area_center (Rectangle, Area, Row, Column)</l>
+<l>Columns:=[0,Column,ImageW-1]</l>
+<l>Means:=[Mean[0],Mean,Mean[|Mean|-1]]</l>
+<l>* gen_nurbs_interp (Means, Columns, [], 3, CtrlRows, CtrlCols, Knots)</l>
+<l>gen_contour_nurbs_xld (nurbs, Means, Columns, 'auto', 'auto', 2, 1, 1)</l>
+<l>get_contour_xld (nurbs, RowS, ColS)</l>
+<l>tuple_round (ColS, ColSRound)</l>
+<l>gen_image_const (Image1, 'real', ImageW, 1)</l>
+<l>set_grayval (Image1, RowS-RowS+0, ColSRound, RowS)</l>
+<l>tuple_gen_sequence (0, ImageW-1, 1, MyCols)</l>
+<l>get_grayval (Image1, MyCols-MyCols, MyCols, Grayval)/////////////////////</l>
+<l>stop ()</l>
+<c>**********************************</c>
+<l>if(0)</l>
+<l>threshold (ImageAlbedo, Regions, 69, 255)</l>
+<l>gen_rectangle1 (Rectangle1, 1000, 0, 3000, ImageW-1)</l>
+<l>* reduce_domain (ImageAlbedo, Rectangle1, ImageReduced)</l>
+<l>gray_projections (Rectangle1, ImageAlbedo, 'simple', HorProjection, VertProjection)</l>
+<l>tuple_gen_sequence (0, |VertProjection|-1, 1, Sequence)</l>
+<l>gen_contour_polygon_xld (Contour, VertProjection, Sequence)</l>
+<l>smooth_contours_xld (Contour, SmoothedContours, 55)</l>
+<l>get_contour_xld (SmoothedContours, Grayval, ColS1)////////////////</l>
+<l>endif</l>
+<c>**********************************</c>
+<l>ImageH:=Height[0]</l>
+<l>ImageW:=Width[0]</l>
+<l>create_matrix (ImageH, 1, 1.0, OnesH)</l>
+<l>create_matrix (1, ImageW, 1.0, MatW)</l>
+<l>set_full_matrix (MatW, Grayval)//////////////////</l>
+<l>mult_matrix (OnesH, MatW, 'AB', Mat_W_Unwrap)</l>
+<l>get_full_matrix (Mat_W_Unwrap, ValuesW)</l>
+<l>gen_rectangle1 (Rectangle, 0, 0, ImageH-1, ImageW-1)</l>
+<l>get_region_points (Rectangle, Rows, Columns)</l>
+<l>gen_image_const (ImageA, 'real', ImageW, ImageH)</l>
+<l>set_grayval (ImageA, Rows, Columns, ValuesW)</l>
+<c>****</c>
+<l>* convert_image_type (Image, ImageConverted, 'byte')</l>
+<l>* write_image (ImageConverted, 'bmp', 0, 'AlbedoFFC')</l>
+<l>* write_image (Image, 'tiff', 0, 'AlbedoFFC1')</l>
+<l>* write_object (ImageA, 'AlbedoFFC')</l>
+<l>* read_object (Object, 'AlbedoFFC')</l>
+<l>HalconConfigsFold:='HalconConfigs/'</l>
+<l>zoom_image_factor (ImageA, AlbedoFFCZ, 0.25, 0.25, 'bilinear')</l>
+<l>write_object (AlbedoFFCZ, HalconConfigsFold+'AlbedoFFC4')</l>
+<l>stop ()</l>
+<c>**********************************************************************************</c>
+<c>*DiffuseFFC</c>
+<c>**********************************************************************************</c>
+<l>ImagesFold3:='D:/S1_Images/黑线做FFC/3Diffuse'</l>
+<l>list_image_files (ImagesFold3, 'default', [], ImageFiles)</l>
+<l>ImgNum:=|ImageFiles|</l>
+<l>read_image (Diffuses, ImageFiles)</l>
+<c>*****</c>
+<l>get_image_size (Diffuses, Width, Height)</l>
+<l>gen_image_const (ImageDiffuse, 'byte', Width[0], Height[0])</l>
+<l>count_obj (Diffuses, ImgNum)</l>
+<l>for Index:=1 to ImgNum by 1</l>
+<l>    select_obj (Diffuses, Albedo, Index)</l>
+<l>    median_image (Albedo, ImageMedian, 'circle', 6, 'mirrored')</l>
+<l>    max_image (ImageDiffuse, ImageMedian, ImageDiffuse)    </l>
+<l>*     dev_display (Image)</l>
+<l>*     stop ()</l>
+<l>endfor</l>
+<l>stop ()</l>
+<c>**********************************</c>
+<l>threshold (ImageDiffuse, ROI1, 30, 255)</l>
+<l>ImageH:=Height[0]</l>
+<l>ImageW:=Width[0]</l>
+<l>Step:=800</l>
+<l>tuple_gen_sequence (0, ImageW-1, Step, ColSeq)</l>
+<l>gen_rectangle1 (Rectangle, ColSeq-ColSeq+1000, ColSeq, ColSeq-ColSeq+ImageH*0.25-1, ColSeq+Step)</l>
+<l>erosion_circle (ROI1, ROI, 5)</l>
+<l>intersection (Rectangle, ROI, ROIRectangle)</l>
+<l>intensity (ROIRectangle, ImageDiffuse, Mean, Deviation)</l>
+<l>area_center (Rectangle, Area, Row, Column)</l>
+<l>Columns:=[0,Column,ImageW-1]</l>
+<l>Means:=[Mean[0],Mean,Mean[|Mean|-1]]</l>
+<l>* gen_nurbs_interp (Means, Columns, [], 3, CtrlRows, CtrlCols, Knots)</l>
+<l>gen_contour_nurbs_xld (nurbs, Means, Columns, 'auto', 'auto', 2, 1, 1)</l>
+<l>get_contour_xld (nurbs, RowS, ColS)</l>
+<l>tuple_round (ColS, ColSRound)</l>
+<l>gen_image_const (Image1, 'real', ImageW, 1)</l>
+<l>set_grayval (Image1, RowS-RowS+0, ColSRound, RowS)</l>
+<l>tuple_gen_sequence (0, ImageW-1, 1, MyCols)</l>
+<l>get_grayval (Image1, MyCols-MyCols, MyCols, Grayval)/////////////////////</l>
+<l>stop ()</l>
+<c>**********************************</c>
+<l>ImageH:=Height[0]</l>
+<l>ImageW:=Width[0]</l>
+<l>create_matrix (ImageH, 1, 1.0, OnesH)</l>
+<l>create_matrix (1, ImageW, 1.0, MatW)</l>
+<l>set_full_matrix (MatW, Grayval)//////////////////</l>
+<l>mult_matrix (OnesH, MatW, 'AB', Mat_W_Unwrap)</l>
+<l>get_full_matrix (Mat_W_Unwrap, ValuesW)</l>
+<l>gen_rectangle1 (Rectangle, 0, 0, ImageH-1, ImageW-1)</l>
+<l>get_region_points (Rectangle, Rows, Columns)</l>
+<l>gen_image_const (Image2, 'real', ImageW, ImageH)</l>
+<l>set_grayval (Image2, Rows, Columns, ValuesW)</l>
+<c>****</c>
+<l>HalconConfigsFold:='HalconConfigs/'</l>
+<l>zoom_image_factor (Image2, DiffuseFFCZ, 0.25, 0.25, 'bilinear')</l>
+<l>write_object (DiffuseFFCZ, HalconConfigsFold+'DiffuseFFC4')</l>
+<l>stop ()</l>
+<c>**********************************************************************************</c>
+<c>*RoughnessFFC</c>
+<c>**********************************************************************************</c>
+<l>ImagesFold3:='D:/S1_Images/黑线做FFC/4Roughness'</l>
+<l>list_image_files (ImagesFold3, 'default', [], ImageFiles)</l>
+<l>ImgNum:=|ImageFiles|</l>
+<l>read_image (Roughnesss, ImageFiles)</l>
+<l>* stop ()</l>
+<c>*************</c>
+<l>get_image_size (Roughnesss, Width, Height)</l>
+<l>gen_image_const (ImageRoughness, 'byte', Width[0], Height[0])</l>
+<l>count_obj (Roughnesss, ImgNum)</l>
+<l>for Index:=1 to ImgNum by 1</l>
+<l>    select_obj (Roughnesss, Albedo, Index)</l>
+<l>    median_image (Albedo, ImageMedian, 'circle', 6, 'mirrored')</l>
+<l>    max_image (ImageRoughness, ImageMedian, ImageRoughness)</l>
+<l>*     dev_display (Image)</l>
+<l>*     stop ()</l>
+<l>endfor</l>
+<c>**********************************</c>
+<l>threshold (ImageRoughness, ROI1, 30, 255)</l>
+<l>ImageH:=Height[0]</l>
+<l>ImageW:=Width[0]</l>
+<l>Step:=800</l>
+<l>tuple_gen_sequence (0, ImageW-1, Step, ColSeq)</l>
+<l>gen_rectangle1 (Rectangle, ColSeq-ColSeq+1000, ColSeq, ColSeq-ColSeq+ImageH*0.25-1, ColSeq+Step)</l>
+<l>erosion_circle (ROI1, ROI, 5)</l>
+<l>intersection (Rectangle, ROI, ROIRectangle)</l>
+<l>intensity (ROIRectangle, ImageRoughness, Mean, Deviation)</l>
+<l>area_center (Rectangle, Area, Row, Column)</l>
+<l>Columns:=[0,Column,ImageW-1]</l>
+<l>Means:=[Mean[0],Mean,Mean[|Mean|-1]]</l>
+<l>* gen_nurbs_interp (Means, Columns, [], 3, CtrlRows, CtrlCols, Knots)</l>
+<l>gen_contour_nurbs_xld (nurbs, Means, Columns, 'auto', 'auto', 2, 1, 1)</l>
+<l>get_contour_xld (nurbs, RowS, ColS)</l>
+<l>tuple_round (ColS, ColSRound)</l>
+<l>gen_image_const (Image1, 'real', ImageW, 1)</l>
+<l>set_grayval (Image1, RowS-RowS+0, ColSRound, RowS)</l>
+<l>tuple_gen_sequence (0, ImageW-1, 1, MyCols)</l>
+<l>get_grayval (Image1, MyCols-MyCols, MyCols, Grayval)/////////////////////</l>
+<l>stop ()</l>
+<c>**********************************</c>
+<l>ImageH:=Height[0]</l>
+<l>ImageW:=Width[0]</l>
+<l>create_matrix (ImageH, 1, 1.0, OnesH)</l>
+<l>create_matrix (1, ImageW, 1.0, MatW)</l>
+<l>set_full_matrix (MatW, Grayval)//////////////////</l>
+<l>mult_matrix (OnesH, MatW, 'AB', Mat_W_Unwrap)</l>
+<l>get_full_matrix (Mat_W_Unwrap, ValuesW)</l>
+<l>gen_rectangle1 (Rectangle, 0, 0, ImageH-1, ImageW-1)</l>
+<l>get_region_points (Rectangle, Rows, Columns)</l>
+<l>gen_image_const (Image3, 'real', ImageW, ImageH)</l>
+<l>set_grayval (Image3, Rows, Columns, ValuesW)</l>
+<c>****</c>
+<l>HalconConfigsFold:='HalconConfigs/'</l>
+<l>zoom_image_factor (Image3, RoughnessFFCZ, 0.25, 0.25, 'bilinear')</l>
+<l>write_object (RoughnessFFCZ, HalconConfigsFold+'RoughnessFFC4')</l>
+<c></c>
+<l>stop ()</l>
+<c></c>
+<c></c>
+<c></c>
+<l>stop ()</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+<procedure name="LoadImages">
+<interface>
+<oo>
+<par name="X1" base_type="iconic" dimension="0"/>
+<par name="X2" base_type="iconic" dimension="0"/>
+<par name="X3" base_type="iconic" dimension="0"/>
+<par name="X4" base_type="iconic" dimension="0"/>
+<par name="Y1" base_type="iconic" dimension="0"/>
+<par name="Y2" base_type="iconic" dimension="0"/>
+<par name="Y3" base_type="iconic" dimension="0"/>
+<par name="Y4" base_type="iconic" dimension="0"/>
+<par name="Normal" base_type="iconic" dimension="0"/>
+<par name="SpecularRF" base_type="iconic" dimension="0"/>
+<par name="DiffuseRF" base_type="iconic" dimension="0"/>
+<par name="GlossRatio" base_type="iconic" dimension="0"/>
+<par name="Shape1" base_type="iconic" dimension="0"/>
+<par name="Shape2" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="CurrentFile" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<l>list_image_files (CurrentFile, 'default', [], ImageFiles)</l>
+<l>tuple_regexp_select (ImageFiles, ['\\.(bmp|jpg)$','ignore_case'], ImageFiles)</l>
+<l>read_image (CurrentImages, ImageFiles)</l>
+<l>StartPos := 26</l>
+<l>for Index := 0 to |ImageFiles|-1 by 1</l>
+<l>parse_filename (ImageFiles[Index], BaseName, Extension, Directory)</l>
+<l>    tuple_strlen (BaseName, Len)</l>
+<l>    EndPos := Len-1</l>
+<l>    if (EndPos&lt;-1)</l>
+<l>        continue</l>
+<l>    endif</l>
+<l>    tuple_substr (BaseName, StartPos, EndPos, Substring)</l>
+<l>    if (Substring='X1')</l>
+<l>        read_image (X1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='X2')</l>
+<l>        read_image (X2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='X3')</l>
+<l>        read_image (X3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='X4')</l>
+<l>        read_image (X4, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='Y1')</l>
+<l>        read_image (Y1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='Y2')</l>
+<l>        read_image (Y2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='Y3')</l>
+<l>        read_image (Y3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='Y4')</l>
+<l>        read_image (Y4, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='Normal')</l>
+<l>        read_image (Normal, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='SpecularRF')</l>
+<l>        read_image (SpecularRF, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='DiffuseRF')</l>
+<l>        read_image (DiffuseRF, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='GlossRatio')</l>
+<l>        read_image (GlossRatio, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='Shape1')</l>
+<l>        read_image (Shape1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='Shape2')</l>
+<l>        read_image (Shape2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>endfor</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="LoadImages">
+<parameters>
+<parameter id="CurrentFile"/>
+<parameter id="DiffuseRF"/>
+<parameter id="GlossRatio"/>
+<parameter id="Normal"/>
+<parameter id="Shape1"/>
+<parameter id="Shape2"/>
+<parameter id="SpecularRF"/>
+<parameter id="X1"/>
+<parameter id="X2"/>
+<parameter id="X3"/>
+<parameter id="X4"/>
+<parameter id="Y1"/>
+<parameter id="Y2"/>
+<parameter id="Y3"/>
+<parameter id="Y4"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="SaveHalconWindowImage">
+<interface>
+<io>
+<par name="ShowImage" base_type="iconic" dimension="0"/>
+<par name="DefectRegion" base_type="iconic" dimension="0"/>
+<par name="InputROI" base_type="iconic" dimension="0"/>
+</io>
+<ic>
+<par name="OutDirectory" base_type="ctrl" dimension="0"/>
+<par name="windowScale" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<c>* crop gradImage</c>
+<l>reduce_domain (ShowImage, InputROI, ImageReduced)</l>
+<l>get_domain (ImageReduced, Domain)</l>
+<l>area_center (Domain, Area, Row, Column)</l>
+<l>crop_domain (ImageReduced, ImagePart)</l>
+<l>get_image_size (ImagePart, Width, Height)</l>
+<l>hom_mat2d_identity (HomMat2DIdentity)</l>
+<l>hom_mat2d_translate_local (HomMat2DIdentity, -Row[0]+Height[0]/2, -Column[0]+Width[0]/2, HomMat2DTranslate)</l>
+<l>affine_trans_region (DefectRegion, RegionAffineTrans, HomMat2DTranslate, 'nearest_neighbor')</l>
+<l>* affine_trans_region (RegionUnion1, Line, HomMat2DTranslate, 'nearest_neighbor')</l>
+<c>* *display</c>
+<l>dev_clear_window ()</l>
+<l>dev_close_window ()</l>
+<l>get_image_size (ImagePart, Width1, Height1)</l>
+<l>* windowScale := 1.0</l>
+<l>dev_open_window (0, 0, Width1[0]*windowScale, Height1[0]*windowScale, 'black', WindowHandle)</l>
+<l>dev_display (ImagePart)</l>
+<l>dev_set_draw ('fill')</l>
+<l>dev_set_line_width (3)</l>
+<l>* dev_display (Line)</l>
+<l>dev_set_draw ('margin')</l>
+<l>dev_set_line_width (6)</l>
+<l>dev_set_color ('red')</l>
+<l>dev_display (RegionAffineTrans)</l>
+<l>dev_get_window (WindowHandle)</l>
+<c>* get</c>
+<l>dump_window_image (Image, WindowHandle)</l>
+<l>list_image_files (OutDirectory, 'default', [], ImageFiles)</l>
+<l>tuple_regexp_select (ImageFiles, ['\\.(bmp|jpg)$','ignore_case'], ImageFiles)</l>
+<l>currFileNum := |ImageFiles|</l>
+<l>ImageNewName := OutDirectory+'/'+currFileNum+'.bmp'</l>
+<l>write_image (Image, 'bmp', 0, ImageNewName)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="SaveHalconWindowImage">
+<parameters>
+<parameter id="DefectRegion"/>
+<parameter id="InputROI"/>
+<parameter id="OutDirectory"/>
+<parameter id="ShowImage"/>
+<parameter id="windowScale"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="FitYupleLine">
+<interface>
+<ic>
+<par name="Mx" base_type="ctrl" dimension="0"/>
+<par name="My" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="Y" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<xb>S3JbWhGpSrb4Df7DqKWw7FtoEXBENZ1LV8lO5kkrG4Fr9OXJKRlox4Dr1kHOJeow1TKI9+nQBfrgNFCqI5583B3fw8tXFJkLkXgeCZWY6j6DiPzLwmNZqy7rMz5FNMfi65FS3LUdSrd1/P6uHb1+08+Xhl4xaXvzgoKlhFevxm9+AwxdL8JxFkgs5k2F7kfMo340rYhMBVfL14qcxdttoW38tAMkvQ3ZU9NoVbZDNDSJ7hMLjN97dvaH5gTpBO4nx8GApkzsom/y1xGFOZPR+j4DAefO8zPWnWq6E5+j+wcCnlvXzlPnuy9d5gTRp3XKeg97rD8vb8cSXAwK2h9Hm76d1zOmx/xKktJTb3kMF/6i6WKWvR6zKmaY6JsWoEy5C82ZoNjH7EL5TwXJtQMCQsqqgoRqG7BVxo7opD4CPB7yNKcgYP3zybLqAnjXMpWJ9tbfg/ERmz+rI8XTxr0G9xT+h21vQblgiyYeDiz/TKv3TNjmkFDpPYG+fCEM1ATe3aN37rJBctjKu2nb2rMbPb95LCPqdGfcrQ2ezsQIMBbgG1/2AMHAJH0pjwGIVv3O7YFasb/jo4SY8YMBXvpK3llLc89M1Ko+MvEHQKBezY5qV/zZ3uvpo/r2ngbZnLlUzLBUrGIFDl9kIKkJ7rnifhVsVnQII/BJ5Bu+Ntz7/b0J0mQwVPs5oscCAZ32ep5bDWXxU9VMP82tu9Vft/5jnrtGFZtjPb6lkWBA+cQuXV39W1u+p2SJRwtUJbDZNEESE/cF3KZ4KAZsZ0wjuy8iXYfDmIZQHOv9FYu4H4gZBcJiqEpjytdD/an5FNSNo/Vd6NTcX4qPSMsLIuSBzvpRIBhx4BWBNIle18SQU33jAoC4V63JzkSMhjlInSRGkWirQGnbocTLQGpD2Zu2xZb2mXVvhWm0lq0f11DDY8OecJSyjPxBWT5D1VWtbE/dX2OZM/OOnUF3DHMQFxusB3fgJSYIJLw9KTvEsW4zHMm0FGY0gzpknh5ylL4mqW2e8ufnT8hEiWDZkQF92SLD49SZ4XEPMYpdcuPfImMuI+ODJLX5n4y+I8XczCOVEdgdkBcgjE81oFoGr5d8vIGUpq1jZFjkKfx4b/GNuLqbXPDusHE3bieC7QFWkQF43lMYoHRIJkQUhGpfTUU3LNa8zGJP0NkondG7ESIVENj3ns2ud6G7pWNe/manqDX0peX9eRSX75L3A0u8kkYTTAz+6hSq+PtNtcLnZmCDQ/xVY5R5oW1CxvoCZur1ms4MdbGeSgnOoVzRyuyoUAhBIIT6aNlxvpE+il+TLtgQV20HYqbiFJIEndjN1dnxnPnVy4qvRJaKpauAHGp5qyHhcRRyaX0392x1oDVSSToPV99rLiUiMJpQi1uTGbm3kJDuXJcTxES0u1jQJt1PUfpkrJEz2Jus2CFIkSSyU2ATGawahOZDfnw+EGAlImGq1tVqQaUqyrulTJHX05ie6XbeABhFB4dKmFLSUzM6EjuD4nT0aRq3LJQ9f564czM8Na887uBYHYkZ7d4Z/2ah+ncRcy0uhMGR+RG39SxtVmJEyWtdbhYjVpCwWFToob9QBYfgadAdqHA8FjmTBuuGgUAZdhLOKLEX+fzukU0I9ojbUuYxHKFgqngGf26mh0YOX8oNs2DEGHmenTZK/GdUnnzWHeUK5oPa+73J3er+peznJyU4MeHzaS7ewPzZYUTBJNvVpw4yN+d1rwstt1ak+0KSxwtdTB4g46Q5JQsAgTvNivi0jXNnBO+7KaV3zeGXFQ2xHWIeXHzehQ0+z9dVjVzjiyd3q9xk8xMinNppIIMt7hDlKoEk2B2lcPVMe2XTST0FEUSzzuS4CH4OJKEGkOs</xb>
+<docu id="FitYupleLine">
+<parameters>
+<parameter id="Mx"/>
+<parameter id="My"/>
+<parameter id="Y"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GetBackground">
+<interface>
+<io>
+<par name="PhaseX" base_type="iconic" dimension="0"/>
+<par name="ROI" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="BackX" base_type="iconic" dimension="0"/>
+</oo>
+</interface>
+<xb>DV2oYcZKL5LnBf3ksiZNum3lsqk68+8ydHWC1+/TcPbqVkW3n+X/bwUuBOQ5NKqYHhPSufOScZyydyLA4GQpC9xrorqOK3YEeF3KEs5QVnEOedA1E6oUSEm0aXatD5hHFvI4n9e6hB7zZOGn4U8gq5AcMfxktSCaXenDrjYfuBuwJ6kdtOJzStDEZMmQjozmO5kYr53vCmUegaLgE8om7PhbP89vC2ZOLn1ygQuKpw6n0mWi+lVUMjdrLCWPBrSjSAQ4zeUaaOo/lYPz7lViAUUqlASd+XyWGA3lAfo67c7ztIEs6cSjvubeT+bpsIftaJCvTOKF2g78+A5uT46eKMg2Hps7eScItxZoMQ+9M2Iqvc7+Sbsxe7igPq7tTlThCsSm7BuT5mplueFNql4jjZLyHX8Bui3DlOvxrslcdr4ZQyi2ffl5okNufM1wp3+2UOfHgjdNpq3gHxDJyGmP0fpVKh7aKdrRBmbR13/LF1voALWoKvZrih7trqUeucYQW8whJPmZxcQ3bjf8OVsBA81Q8ZOC0r/HWPmeeRWNPND27hVFGtgIWp5xuRmjP0iJF9Eusdr8lvUeOSuUVaulLFr8zUorACMe/cAqkPxS+zfOXVG3Bj3hTk+4pkfD2yY0amdvJwfan2E98u/te6MY877XtunxJGQRn+RfPnYFWCAUtiZnYdIDlTplO3+Dd9zrUQzTGQrJR1way4AKMS9Tlbrz8wcY8OVlSrJotZcg24WjjXNIbnjXcfCOp5wWSiSVAhEB6OzaJufUg3Gl3JP3Pz/WeR1msuWXVLzUH3D3UVgpUCONoKSGWR3TF68PgzgemcHP3wvF+5ebDEBsAHQ92UwMeUXdX2/KtV7psziVY6C/v5LTbO3EITxmLmv/2VEufTxIPG3GfxYN5gY7etQEZfKc8pICP72SJizZ2cDZvn+PNSQEQNYkTAw7stkpHS2RbWjZMA3tCr9VmdoTwAfrr7E1tjHfHv1uzMj2mjHdTf1nnnKrZ0vkEfcR7K6LlFUIcuUf2vySVNFi2sY6VMY4L9CtECpvi4Z85V+Xhp3cYTIu+8WRQn3PBIHDbv9S01S5eYB+WTDZyigUm0HRMv59j+EsrLyi+BuW1ke6XyJlO5DFQaEvi3fkV0ZmUQcR+OdYfNbY3HAtL7r0v/gL2mVWHceKJywW8m4PtyHpgltZn8lamUPef2Jtwq6I8RjamwZ/N/yE8EBKf5i4fEgl+t9ClTYhqmF1ljQFumOGqJASeJZHiKH13l2NGzGhJT0BwO5UAp9ITIotthOESrWqOA21dPwSiTW8/Qw3ymfByEEs2LghlsirBs9T/t2xc06AAV2AL6U3KORgHA5FUUc/LDJ+bsWUWSYp7pXGr25Ltm1H6fmLDwxgZd7FnWJ6dgZX5ETgsgFW7+i2bemENCAcLee/8F7+ZrzeuUjHBcUhIeEhxi1y5aXkI55nserGbdwuNmgSrKYOAhHWTL+KNrQ66VQ2zQHp/goVJ3WxLV5tAuBuHHCrkkVyagSQnoYz4zs+5b2W2s3bzm5I4cLRvHmBeoQKRR17vjmY4xyDi+NQYelYIobEnGRCxge1tXUrzwIqovjT7KuOVu+TMwKS8qWzjFRfyS13whXNWotnDvtL2HUB3hI</xb>
+<docu id="GetBackground">
+<parameters>
+<parameter id="BackX"/>
+<parameter id="PhaseX"/>
+<parameter id="ROI"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="LoadXYImages">
+<interface>
+<oo>
+<par name="X_Images" base_type="iconic" dimension="0"/>
+<par name="Y_Images" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Files" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>gen_empty_obj (NImage)</l>
+<l>list_image_files (Files, 'default', [], ImageFiles)</l>
+<l>tuple_regexp_select (ImageFiles, ['\\.(bmp|jpg)$','ignore_case'], ImageFiles)</l>
+<l>StartPos := 0</l>
+<l>for Index := 0 to |ImageFiles|-1 by 1</l>
+<l>parse_filename (ImageFiles[Index], BaseName, Extension, Directory)</l>
+<l>    tuple_strlen (BaseName, Len)</l>
+<l>    EndPos := Len-1</l>
+<l>    if (EndPos&lt;-1)</l>
+<l>        continue</l>
+<l>    endif</l>
+<l>    tuple_substr (BaseName, StartPos, EndPos, Substring)</l>
+<l>    if (Substring='X1')</l>
+<l>        read_image (X1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='X2')</l>
+<l>        read_image (X2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='X3')</l>
+<l>        read_image (X3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='X4')</l>
+<l>        read_image (X4, ImageFiles[Index])</l>
+<l>    endif</l>
+<c></c>
+<c>    </c>
+<l>    if (Substring='Y1')</l>
+<l>        read_image (Y1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='Y2')</l>
+<l>        read_image (Y2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='Y3')</l>
+<l>        read_image (Y3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='Y4')</l>
+<l>        read_image (Y4, ImageFiles[Index])</l>
+<l>    endif</l>
+<c>    </c>
+<l>endfor</l>
+<l>* stop ()</l>
+<l>concat_obj (X1, X2, ObjectsConcat)</l>
+<l>concat_obj (ObjectsConcat, X3, ObjectsConcat1)</l>
+<l>concat_obj (ObjectsConcat1, X4, X_Images)</l>
+<c></c>
+<l>concat_obj (Y1, Y2, ObjectsConcat)</l>
+<l>concat_obj (ObjectsConcat, Y3, ObjectsConcat1)</l>
+<l>concat_obj (ObjectsConcat1, Y4, Y_Images)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="LoadXYImages">
+<parameters>
+<parameter id="Files"/>
+<parameter id="X_Images"/>
+<parameter id="Y_Images"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="SplitImagesGPU">
+<interface>
+<io>
+<par name="PartXF" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Width_ImagesF" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="SumLight" base_type="ctrl" dimension="0"/>
+<par name="PullIndex" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<c>* Get list of all available compute devices.</c>
+<l>query_available_compute_devices (DeviceIdentifier)</l>
+<l>if (|DeviceIdentifier| != 1)</l>
+<l>    return ()</l>
+<l>endif</l>
+<c>* Open device.</c>
+<l>open_compute_device (DeviceIdentifier[0], DeviceHandle)</l>
+<c>* Deactivate asynchronous execution to obtain reliable benchmarks.</c>
+<l>set_compute_device_param (DeviceHandle, 'asynchronous_execution', 'false')</l>
+<c>* Call affine_trans_image on this device and measure the obtained speed-up.</c>
+<c>* Activate the compute device and perform the initialization of affine_trans_image.</c>
+<c>* If this is omitted, the initialization is performed with the first</c>
+<c>* call of affine_trans_image.</c>
+<l>init_compute_device (DeviceHandle, 'all')</l>
+<l>activate_compute_device (DeviceHandle)</l>
+<c>*</c>
+<l>count_seconds(S1)</l>
+<l>SplitImages (PartXF, Width_ImagesF, SumLight, PullIndex)</l>
+<l>count_seconds(S2)</l>
+<l>Time1:=S2-S1</l>
+<c>* Deactivate the device and perform the same benchmark on the CPU.</c>
+<l>deactivate_compute_device (DeviceHandle)</l>
+<c></c>
+<l>stop ()</l>
+<l>return ()</l>
+</body>
+<docu id="SplitImagesGPU">
+<parameters>
+<parameter id="PartXF"/>
+<parameter id="PullIndex"/>
+<parameter id="SumLight"/>
+<parameter id="Width_ImagesF"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="Pre0525">
+<interface>
+<io>
+<par name="AllImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Dust" base_type="iconic" dimension="0"/>
+<par name="Albedo" base_type="iconic" dimension="0"/>
+<par name="AllCur" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>hnfmCU0ehZo/9BiNNeKvRtFBeda93Ov5H1Wj7RTLFK3jtQW0MucvT6fvMoQXULMiRH86uj1C0BdOvRoFA2utDfkvhdZTxcj/nJHWdBh/uKwIgHhUdWg75xV4LhQhEbUwAt2+87NPwl7Frm5npn1ypLxep3aKCDxJx9nUI/G105PDk2C3B/UZzpc+Y7WtopD/6RmTVtN6psX+hn/GA1GWL0gh1vkocDIFR/oJbckuh+YD8wf4ObBHDHNfx/WpogYaX+4P6xnpx3Fpk4yyFWwShP2X1L1iBTmNZk6T2znwXMqk1fE/ZIP0XuDv4Kh9zfWEtIWbt4ZzN9cTaWBDrosvU7PLoO88iNkiGgPYBiuazJ7aSzpzWRlr7Qdkjh2ed2011rCZYzfqY8o1L5jYsWjsmJM/x0Aph/erjauZJwdHNCA6MgbcSyjeRvHURJ4ZCOv1f8AZXE0XXJAchEayrdbkU1N0bnWpxFmca8UjvSnawO5FrV66iv9f87sNO61d4bI5sDwrQzWQZUn/F8pdgx5cwRig5S8IhBRwwB5iboVWg7+MT2+F9qWsy03TdoHjSSQmbhYooHhcn7007m66OKxT5sfyVoL392MubavwPxy2C28y1XpdUR6aBXzRVHI5vOUF1B7t/K0eI6H8qo+LCkkxzk/mTPIi4KhxCVp31luzU4yDYn9WF/Bh5553eKkKkShJlEc0P2qbD1xfyEeFLRSi9V7EjVyxm63QfDOczTzZhX7YNbgmvB0BPxv21eSLarniSSxKmD1VDgfcNLj80bgu/mOHSvPod+bcRQdGy5eZ181lxAiOx/mpoif/J2Ea05Jp/7xGlpLNie7FDt0/LwTHMbJnP9iWlGbIORjDC9raw+rHlP8pVVT/JQ7MFWuXc9lTuyOHp28Xgv2IgwkwbTJdGPGyx88Ab2NYppsOoHDGE8W913C4LN4B5B/kDN4giHmsjCPeB9E2kOf06zc5cxaOE3/spWCoNbLlOHtle+e1rAa4OfSyOSyW+WVXtv2XzaZudy0345Ck7sOadMAOeUQr8HQtv64SBg6eg+w7lpoZBfbS1Tbdt5H78d1E6qY/A4WcmlrdShIfl4za4WMpnEnljbOvJum65vsalyTVe7yRn9jgbozkRBmpX7uyTsG9P6nPNebU5MZwyAN0HKZDjEQICuZFLATtcj8vE5cJZW33+MFBheS/3eHWD0qXxk+ivlyqy8Q9/A30TXlfXl5wBChHhec5n6ZMHqKXkihx3bYo7JMKhzWnkDyOBKmzleSzfwtTqEsyU/0xCK8YPlBPaZJeTLdds6xSIbmCJHhKKykFmNsclE384TLgGawj2Eig5CquihyBIA0nJjoIeJRWb0QZOsMpd7CNSbhyzqAS3rCULA7QP+sVp/rwpBrsVlWSR7B5gxhxqPOjbVXT2EAGgvCQ5iUvZELhD4ZZzmvCKQNc+L0NT1iN2FdS2QJpOp9AscyB6agAD4epahqQM1mfob1M9n4KaLxRnLb2u0GYpXXU+4SsfqNcgD5OfaMyavCFBCVoDwvvqSbhcoIMfSyV+TcLVToiw62COTIcSEVc1mKvhnbND0uDSjF5NlcvY94Vl+zkDLqu+PmbwzbsXDx0n4EwLf1lnLyCYm72plN3cX7xHeGPSCKZAqoGgEfbyZ3DVvcbb1UvznQy/vXfqv/kZkT8UqcEJMog9HW9+ujAswpbyzjytsqCXbD3r+fpeII0k3vocTjKCta/jJtc7loE3roA32hOw5FXuI/pl8/q65ZtNckMOggVKDyibfKnYpZezaoc2p9cyhoqYk/oTFYlqp+dCbkvqQfu/m5JFV8jxrYRcKTRgl6SA8hqSsGxPrOhIjjeLSizu7JP9wq2tnk42jXhDz0H9Tt8tdBUSyszi9gQ0xznSRKiLnMR3WLQA8YJ4T6ZB5u3Y2xWujQ</xb>
+<docu id="Pre0525">
+<parameters>
+<parameter id="Albedo"/>
+<parameter id="AllCur"/>
+<parameter id="AllImages"/>
+<parameter id="Dust"/>
+<parameter id="Pose"/>
+<parameter id="Slants"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="ScaleCurImage">
+<interface>
+<io>
+<par name="CurX" base_type="iconic" dimension="0"/>
+<par name="CurY" base_type="iconic" dimension="0"/>
+<par name="CurMean" base_type="iconic" dimension="0"/>
+<par name="CurMax" base_type="iconic" dimension="0"/>
+<par name="CurMin" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="XCur" base_type="iconic" dimension="0"/>
+<par name="YCur" base_type="iconic" dimension="0"/>
+<par name="MeanCur" base_type="iconic" dimension="0"/>
+<par name="MaxCur" base_type="iconic" dimension="0"/>
+<par name="MinCur" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="dlt" base_type="ctrl" dimension="0"/>
+<par name="Mean" base_type="ctrl" dimension="0"/>
+<par name="Deviation" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>scale_image_range (CurX, CurXScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<l>scale_image_range (CurY, CurYScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<l>scale_image_range (CurMean, CurMeanScaled, Mean-Deviation*dlt*0.1, Mean+Deviation*dlt*0.1)</l>
+<l>scale_image_range (CurMax, CurMaxScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<l>scale_image_range (CurMin, CurMinScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<l>scale_image_max (CurXScaled, XCur)</l>
+<l>scale_image_max (CurYScaled, YCur)</l>
+<l>scale_image_max (CurMeanScaled, MeanCur)</l>
+<l>scale_image_max (CurMaxScaled, MaxCur)</l>
+<l>scale_image_max (CurMinScaled, MinCur)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="ScaleCurImage">
+<parameters>
+<parameter id="CurMax"/>
+<parameter id="CurMean"/>
+<parameter id="CurMin"/>
+<parameter id="CurX"/>
+<parameter id="CurY"/>
+<parameter id="Deviation"/>
+<parameter id="MaxCur"/>
+<parameter id="Mean"/>
+<parameter id="MeanCur"/>
+<parameter id="MinCur"/>
+<parameter id="XCur"/>
+<parameter id="YCur"/>
+<parameter id="dlt"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="Pre0526">
+<interface>
+<io>
+<par name="AllImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Dust" base_type="iconic" dimension="0"/>
+<par name="Albedo" base_type="iconic" dimension="0"/>
+<par name="AllCur" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="Pre0526">
+<parameters>
+<parameter id="Albedo"/>
+<parameter id="AllCur"/>
+<parameter id="AllImages"/>
+<parameter id="Dust"/>
+<parameter id="Pose"/>
+<parameter id="Slants"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="Pre0529">
+<interface>
+<io>
+<par name="RawImages" base_type="iconic" dimension="0"/>
+<par name="Map1" base_type="iconic" dimension="0"/>
+<par name="Map2" base_type="iconic" dimension="0"/>
+<par name="Map3" base_type="iconic" dimension="0"/>
+<par name="Map4" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Dust" base_type="iconic" dimension="0"/>
+<par name="Albedo" base_type="iconic" dimension="0"/>
+<par name="AllCur" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="Pre0529">
+<parameters>
+<parameter id="Albedo"/>
+<parameter id="AllCur"/>
+<parameter id="Dust"/>
+<parameter id="Map1"/>
+<parameter id="Map2"/>
+<parameter id="Map3"/>
+<parameter id="Map4"/>
+<parameter id="Pose"/>
+<parameter id="RawImages"/>
+<parameter id="Slants"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="Pre0530">
+<interface>
+<io>
+<par name="RawImages" base_type="iconic" dimension="0"/>
+<par name="Map1" base_type="iconic" dimension="0"/>
+<par name="Map2" base_type="iconic" dimension="0"/>
+<par name="Map3" base_type="iconic" dimension="0"/>
+<par name="Map4" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Dust" base_type="iconic" dimension="0"/>
+<par name="Albedo" base_type="iconic" dimension="0"/>
+<par name="AllCur" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="Pre0530">
+<parameters>
+<parameter id="Albedo"/>
+<parameter id="AllCur"/>
+<parameter id="Dust"/>
+<parameter id="Map1"/>
+<parameter id="Map2"/>
+<parameter id="Map3"/>
+<parameter id="Map4"/>
+<parameter id="Pose"/>
+<parameter id="RawImages"/>
+<parameter id="Slants"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GetDDSyashang">
+<interface>
+<io>
+<par name="CurX" base_type="iconic" dimension="0"/>
+<par name="CurY" base_type="iconic" dimension="0"/>
+<par name="Albedo" base_type="iconic" dimension="0"/>
+<par name="Dust" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="DDSRgion" base_type="iconic" dimension="0"/>
+</oo>
+</interface>
+<body>
+<c>*10mm 445pixel</c>
+<c>*22.47un/pixel</c>
+<c>*0.02mm2=0.1414mm*0.1414mm=6.29pixel*6.29pixel=40 pixel2</c>
+<c>*0.05mm2=0.2236mm*0.2236mm=9.95pixel*9.95pixel=99 pixel2</c>
+<c>*0.08mm2=0.2828mm*0.2828mm=12.59pixel*12.59*pixel=159 pixel2</c>
+<c></c>
+<c>**********************************************************************************</c>
+<c>*ROI</c>
+<c>**********************************************************************************</c>
+<l>get_image_size (CurX, Width, Height)</l>
+<l>GetLogoRegion (Albedo, Logo, PartRegion, LogoRow, LogoColumn, Angle, Length1, Length2)</l>
+<c>*ROIX</c>
+<l>dilation_rectangle1 (Logo, LogoDilX, 30,10)</l>
+<l>dilation_rectangle1 (PartRegion,PartDilX, 1, 5)</l>
+<l>erosion_rectangle1 (PartDilX, PartEroX, 120, 1)</l>
+<l>difference (PartEroX, LogoDilX, ROIX)</l>
+<c>*ROIY</c>
+<l>dilation_rectangle1 (Logo,LogoDilY, 10,30)</l>
+<l>dilation_rectangle1 (PartRegion,PartDilY, 5, 1)</l>
+<l>erosion_rectangle1 (PartDilY, PartEroY, 1, 120)</l>
+<l>difference (PartEroY, LogoDilY, ROIY)</l>
+<c>**********************************************************************************</c>
+<c>*Dust</c>
+<c>**********************************************************************************</c>
+<l>scale_image_range (Dust, DustScaled, 0, 20)</l>
+<c></c>
+<c></c>
+<c>*CurMean</c>
+<l>* reduce_domain (CurMean, CurYDDSROI,CurMeanReduced)</l>
+<l>* threshold (CurMeanReduced, Regions, 190, 255)</l>
+<l>* connection (Regions, ConnectedRegions)</l>
+<l>* select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 16, 99999)</l>
+<l>* select_shape (SelectedRegions, SelectedRegions1, 'circularity', 'and', 0, 0.2)</l>
+<c>*CurX</c>
+<l>reduce_domain (CurX, ROIX,CurXReduced)</l>
+<l>Thres:=4</l>
+<l>threshold (CurXReduced, Regions, [255-Thres], [255])</l>
+<l>union1 (Regions, RegionUnion1)</l>
+<l>closing_circle (RegionUnion1, RegionClosing, 3)</l>
+<l>connection (RegionClosing, ConnectedRegions)</l>
+<l>select_shape (ConnectedRegions, SelectX, 'area', 'and', 30, 99999)</l>
+<c>*CurY</c>
+<l>reduce_domain (CurY, ROIY,CurYReduced)</l>
+<l>* Thres:=8</l>
+<l>threshold (CurYReduced, Regions, [255-Thres], [255])</l>
+<l>union1 (Regions, RegionUnion1)</l>
+<l>closing_circle (RegionUnion1, RegionClosing, 3)</l>
+<l>connection (RegionClosing, ConnectedRegions)</l>
+<l>select_shape (ConnectedRegions, SelectY, 'area', 'and', 30, 99999)</l>
+<c>**********************************************************************************</c>
+<c>*union</c>
+<c>**********************************************************************************</c>
+<l>union2 (SelectX, SelectY, RegionUnion)</l>
+<l>union1 (RegionUnion, RegionUnion2)</l>
+<l>closing_circle (RegionUnion2, RegionClosing1, 35)</l>
+<l>connection (RegionClosing1, ConnectedRegions1)</l>
+<l>dilation_circle (ConnectedRegions1, NG, 50)</l>
+<c></c>
+<c></c>
+<l>* xx:=1/tan(rad(3))</l>
+<l>* mean_image (CurYReduced, ImageMean, 100, 100)</l>
+<l>* sub_image (CurYReduced, ImageMean, ImageSub, 1, 128)</l>
+<c>*</c>
+<l>* max_image (CurX, CurY, ImageMin)</l>
+<l>dev_display (Albedo)</l>
+<l>dev_display (CurX)</l>
+<l>dev_display (NG)</l>
+<l>stop ()</l>
+<l>dev_display (DustScaled)</l>
+<l>dev_display (CurX)</l>
+<l>dev_set_color ('blue')</l>
+<l>dev_display (SelectX)</l>
+<l>dev_display (CurY)</l>
+<l>dev_set_color ('red')</l>
+<l>dev_display (SelectY)</l>
+<l>* dev_display (Albedo)</l>
+<l>dev_display (NG)</l>
+<l>* stop ()</l>
+<c></c>
+<l>dev_set_color ('blue')</l>
+<l>return ()</l>
+</body>
+<docu id="GetDDSyashang">
+<parameters>
+<parameter id="Albedo"/>
+<parameter id="CurX"/>
+<parameter id="CurY"/>
+<parameter id="DDSRgion"/>
+<parameter id="Dust"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="LoadRawImages">
+<interface>
+<oo>
+<par name="XF" base_type="iconic" dimension="0"/>
+<par name="XB" base_type="iconic" dimension="0"/>
+<par name="YF" base_type="iconic" dimension="0"/>
+<par name="YB" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="ImagesFold3" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>list_image_files (ImagesFold3, 'default', [], ImageFiles)</l>
+<l>ImgNum := |ImageFiles|</l>
+<l>gen_empty_obj (RawImages)</l>
+<l>for Index := 0 to ImgNum-1 by 1</l>
+<l>    CurrentImgFile := ImageFiles[Index]</l>
+<l>    parse_filename (CurrentImgFile, BaseName, Extension, Directory)</l>
+<l>    tuple_strlen (BaseName, Len)</l>
+<l>    tuple_substr (BaseName, Len-2, Len-1, Substring)</l>
+<l>    if (Substring='XF')</l>
+<l>        read_image (XF, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='XB')</l>
+<l>        read_image (XB, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='YF')</l>
+<l>        read_image (YF, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='YB')</l>
+<l>        read_image (YB, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>endfor</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="LoadRawImages">
+<parameters>
+<parameter id="ImagesFold3"/>
+<parameter id="XB"/>
+<parameter id="XF"/>
+<parameter id="YB"/>
+<parameter id="YF"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="MoveImage0601">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="ImageMoved" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="MoveRow" base_type="ctrl" dimension="0"/>
+<par name="MoveCo" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<c>************************************************************************</c>
+<c>************************************************************************</c>
+<l>hom_mat2d_identity (HomMat2DIdentity)</l>
+<l>hom_mat2d_translate_local (HomMat2DIdentity, MoveRow, MoveCo, HomMat2DTranslate)</l>
+<l>affine_trans_image (Image, ImageMoved, HomMat2DTranslate, 'constant', 'false')</l>
+<l>dev_clear_window ()</l>
+<l>dev_display (Image)</l>
+<l>dev_display (ImageMoved)</l>
+<l>* add_image (Image, ImageMoved, ImageResult, 0.5, 0)</l>
+<l>* stop ()</l>
+<l>return ()</l>
+</body>
+<docu id="MoveImage0601">
+<parameters>
+<parameter id="Image"/>
+<parameter id="ImageMoved"/>
+<parameter id="MoveCo"/>
+<parameter id="MoveRow"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="PreDisColor">
+<interface>
+<io>
+<par name="SplitedImages" base_type="iconic" dimension="0"/>
+<par name="Maps" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Discolors" base_type="iconic" dimension="0"/>
+</oo>
+</interface>
+<xb>j6PszjnZuLSCGYGyY2xELx1Q26rzKsSNW0Qp6Bgq7juOSqReHZLgdWsMdlt4PRu6klAOGgRsytNfQ6C4ej1BzISv2prqtv9Yh81CbbC6HdvMS7xvjKwZCV6a6X9oQeqVRaXsrXdSFbUbYWj+8O4kuW0Gu0c1lXLxSV2ajCkngcbu48h+Q0+LLJ2qfLJoSeAh5Z7ZOsu6PU2H+KNQcwG3ZINe6U121bDRdXdxN2Vt70u3lni4CN8qw0qDjHPPd3rcbBp+tsTxP0F2zHVH3ivQmXXo9cOJSX9g+981OjLBh+nN/evoVdwFCm5VMqwdFFFwwl+04gES8Imt+U5xrrnk7cRWimcxEb1qHygF+orZ2hr4BMbwzfhziUBt8iMjgAwiijeFL3t2nXMUOH1atfWyaXW7C7ymGWvTnBFWIf+5XoMYeGBSEjXH5VdveDEHiwXbRZ7Zk8rLgc97UElepRoFpMCvdHd3yFEhCR9uWxptelpYDOXJMlcJ0+Vm8U5GHZvg8NcJzZNQev2GLFYS4a/NFDp712Lz521s1biQFW+4nE0J2FcOsCK8ZLRGGZIEO6LGM8YNLvlLsffxBmH5WApw91TktY995sRPKwvK03fc1aiEnIGZ4JdhvQ7OSNy5YeYTO82LKjQVB67z9qdreb4F3JWUa6JhRkAxZPmpSCnmp8u8Qmtm0nYbIAiinwVj5OnwgqXwnEsQ5lbRifLXyriCivPxF2frPAIosnfBhWl+mXxWWYKg1vDa8kNSn0X4lpizLaB37QojxSPamm/0tC6hYv0xXZHSEih6QI8sIxs5zoKm5s4VXt8yi8Cz5kDyCz9UY2jnTi9/QzZf1ifJkOajDBUJ2CE10zs1mS/UTv16+fVjeSl6MUQ/NK6/rT1IeErTLjPk8JWGjwE+dM8EKAQP9e98Fr3tfplbxzZxS6vX6vuDQ6F1h2S1dpk8xogxLOtO04+X5AjcZqGlewipntQRQxRK1rrP9wmNwg/qGU5ImQBMVlnR0Ssq83XMDo+0eV6gnA6/WVzQG47an+/sU95bly+BT5PIrtwiR/aCRPHnt7LXboFMXCIsVMgl4TH8vFCSmy2gJpj/Il84jwMXaZK7U08ywf51DSsLvDh+2DppbZFrGaK/5jjOt6vdW3REM1Y4RaXBKmejR1Yxj6FgVMrg6dIumIGE+TKhQiN5n+5pCKWGYgpyPb+xf/2gQkCdg6j/Af+IgiN5OlaFku/bRzY+MOPbUAgtON0vg+qEGhRPI0l6PsgyXAQWZf6Nz9zF000yGargr6pnKfc213eAJQwTUsKoJwPB815yVofU9XFTPJaslHac5FS2CprbjdyPWIWVxFedx18P7yysWNe3caC8eur8S8VZV3iNzacIrrIEZUIc5+hSNuFg/uOX8qsRLCJiwMOqWUKNWtlQG46Ht94RGkaBt6/5msgbZJ0aCcJ+1u+Vncf2uRyUJvLRyyBDb3VPgKV3jfb89tfpU+H5mm8JMZ/vMuuatvn3eAYFLsq8SdKAaDRCh/HkYUs2BG7GflaU2fqRF5icwRpWgcynNMNPhLIoq/tGU15HW6Ktwf4r3w0lFQZC+NX2tQWVlojvnqccIc5KMttCtQp0C9AcTiFnRTea3Qu9ap4zK7Iqm+7q6KPl8zxf0kKUHJT5eCPBfDGl6EFrEfC2JuVJwS3YVAwLhZ/h9RjoMOZY5urEQ3upTObduFA58M9gK4jmrMNubzMld4a5AfjGHAmzetqnRf2tGGmc4iH4g8v/UnsRh7dM8k+sHrOWmPMAIL4PlY8SbG/7vdKeOiMUAg+KsgKnpBVt22bZpsK0RQEC</xb>
+<docu id="PreDisColor">
+<parameters>
+<parameter id="Discolors"/>
+<parameter id="Maps"/>
+<parameter id="SplitedImages"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

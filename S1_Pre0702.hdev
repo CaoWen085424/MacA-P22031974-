@@ -1,0 +1,2216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="20.11.1.0">
+<procedure name="main">
+<interface/>
+<body>
+<c></c>
+<c>**********************************************************************************</c>
+<c>*read_map</c>
+<c>**********************************************************************************</c>
+<c></c>
+<l>HalconConfigsFold:='HalconConfigs/'</l>
+<l>LoadHalconConfigs (FFCMaps, HalconConfigsFold, Slants, Pose, HomMat2D1, HomMat2D2, HomMat2D3, HomMat2D4)</l>
+<c></c>
+<c></c>
+<c></c>
+<c>**********************************************************************************</c>
+<c>**load images</c>
+<c>**********************************************************************************</c>
+<l>ImagesFold3:='D:/S1_Images/BlackLine/120/Black line15'</l>
+<l>count_seconds(S1)</l>
+<l>LoadSplitImages (SplitedImages, ImagesFold3)</l>
+<l>count_seconds(S2)</l>
+<l>TimeLoad:=S2-S1</l>
+<c>**********************************************************************************</c>
+<c>*Pre</c>
+<c>**********************************************************************************</c>
+<l>Pre0701 (SplitedImages, FFCMaps, GrayImages, CurImages, ROI,\
+                 Slants, Pose, HomMat2D1, HomMat2D2, HomMat2D3, HomMat2D4)</l>
+<c></c>
+<c></c>
+<l>stop ()</l>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+<procedure name="GetAlbedo0701">
+<interface>
+<io>
+<par name="AlliImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Albedo" base_type="iconic" dimension="0"/>
+<par name="Diffuse" base_type="iconic" dimension="0"/>
+<par name="Roughness" base_type="iconic" dimension="0"/>
+</oo>
+</interface>
+<body>
+<l>* select_obj (SplitedImages, XF, 0*4+[1,2,3,4])</l>
+<l>* select_obj (SplitedImages, XB, 1*4+[1,3,4])</l>
+<l>* select_obj (SplitedImages, YF, 2*4+[1,2,3,4])</l>
+<l>* select_obj (SplitedImages, YB, 3*4+[1])</l>
+<c></c>
+<l>* select_obj (AlliImages, XF1, 1)</l>
+<l>* select_obj (AlliImages, XF2, 2)</l>
+<l>* select_obj (AlliImages, XF3, 3)</l>
+<l>* select_obj (AlliImages, XF4, 4)</l>
+<c>* Albedo/normal********************************</c>
+<l>* add_image (XF1, XF2, ImageResult1, 0.5, 0)</l>
+<l>* add_image (XF3, XF4, ImageResult2, 0.5, 0)</l>
+<l>* add_image (ImageResult2, ImageResult1, Albedo, 0.5, 0)</l>
+<c>* Diffuse********************************</c>
+<l>* add_image (XF1, XF4, Diffuse, 0.5, 0)</l>
+<c>* Specular********************************</c>
+<l>* max_image (XF2, XF3, ImageMax2)</l>
+<l>* min_image (XF1, XF4, ImageMin1)</l>
+<l>* sub_image (ImageMax2, ImageMin1, Specular, 1, 0)</l>
+<c></c>
+<c>* 0620********************************</c>
+<l>select_obj (AlliImages, XF1, 1)</l>
+<l>select_obj (AlliImages, XF2, 2)</l>
+<l>select_obj (AlliImages, XF3, 3)</l>
+<l>select_obj (AlliImages, XF4, 4)</l>
+<l>* select_obj (AlliImages, XB1, 5)</l>
+<l>* select_obj (AlliImages, XBText, 6)</l>
+<l>* select_obj (AlliImages, Dust0, 7)</l>
+<l>select_obj (AlliImages, YF1, 9)</l>
+<l>select_obj (AlliImages, YF2, 10)</l>
+<l>select_obj (AlliImages, YF3, 11)</l>
+<l>select_obj (AlliImages, YF4, 12)</l>
+<l>* select_obj (AlliImages, YB1, 12)</l>
+<c>* Albedo/normal********************************</c>
+<l>add_image (XF1, XF2, ImageResult1, 0.5, 0)</l>
+<l>add_image (XF3, XF4, ImageResult2, 0.5, 0)</l>
+<l>add_image (ImageResult2, ImageResult1, Albedo, 0.5, 0)</l>
+<c>* Diffuse********************************</c>
+<l>add_image (XF1, XF4, DiffuseX, 0.5, 0)</l>
+<l>add_image (YF1, YF4, DiffuseY, 0.5, 0)</l>
+<l>add_image (DiffuseX, DiffuseY, Diffuse, 0.5, 0)</l>
+<c>* SpecularX********************************</c>
+<l>add_image (XF2, XF3, XF23, 0.5, 0)</l>
+<l>* add_image (XF1, XF4, XF14, 0.5, 0)</l>
+<l>sub_image (XF23, DiffuseX, SpecularX, 1, 0)</l>
+<c>* SpecularY********************************</c>
+<l>add_image (YF2, YF3, YF23, 0.5, 0)</l>
+<l>* add_image (YF1, YF4, YF14, 0.5, 0)</l>
+<l>sub_image (YF23, DiffuseY, SpecularY, 1, 0)</l>
+<c>* SpecularXY********************************</c>
+<l>max_image (SpecularX, SpecularY, Roughness)</l>
+<l>* stop ()</l>
+<c></c>
+<l>return ()</l>
+<c></c>
+</body>
+<docu id="GetAlbedo0701">
+<parameters>
+<parameter id="Albedo"/>
+<parameter id="AlliImages"/>
+<parameter id="Diffuse"/>
+<parameter id="Roughness"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="PSbyBRDFBig0625">
+<interface>
+<io>
+<par name="AllImages" base_type="iconic" dimension="0"/>
+<par name="ROI" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="SlopeX" base_type="iconic" dimension="0"/>
+<par name="SlopeY" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>i6CyuORO+1/Kzx0u922TZo57yF/JDRLcRYKOwU7DvLCBy60ElMCotAfmtRICbUvPopUkiIHn+2qI0tfdrZXTBQpQCW68aHNjBfP9WMtZW04D7JbZlK//DClucUe1oX0eu7rctZAILOxzYizOGegMShi3O67ha0oUrD++NCmNUOkPWpEy07Mbmbr8IUVM1afeopF4LowFZcoRTgiZ84CU16rcxozyykujQIaeHB99I9wdCGjYgYMTTPPGOSLznnxwoXp8Vku5IELVPXHEE9+R1VHVlnV+XPAE52pkjy0l0YGm/zcEMTPjuD4HpWWaq/plxe2+3EM5JaaNjJBTkaIAwDNCFLLA1P3DB8EsDgp2X7rveMcTTvUsnOvDrjOiApiuJOot8K80lLX1Dy7fGvPzaYz0eP20UWn14qNSDBA159upJznCgrwJ304Rvp0XPeAkuE+0yJPUx4Ibc2D1aiJEvI0XRwiZI+FDbiy2EeTKwfauGS4fDZ3QrqBbutgmh81wI4FrxfObvexDzRsXgEZ702fIjlv5ioAAGM9lbapBWdocHYbYPfeJpMIm7A4wIFvtmjfLEGfNpLehpI+zYo9cpqIhz3HLnFPwXfaxEVJLT1I+ojyRoyFxNA8JSHH93tZcugsEeGB/26DzX0EUEizWp6IIiiMn4ZgRZgITjBvNTGLCiCXB5/i+eCpC3nvYN4IcnrAMqXdJhGVU3Ci1AYiunQLO7BPs65BIY396yOnIOJ8oxAZwwWk8v2ckSmcKM1+Q7eVaYI3wRz9dM8OIU6X9FEtYjnVmtVWHUzT4WVha/33r4GMzLfxCix9yHovlhZ82iQe66P2sTVvubA85FgUNN6Of4TM65YxbFyUajWSMVEov0iQ3sKXhWeL+Lf5jt9ypa69Wl+77APQ9/KkfRMlIGJOwO+ni5915qH5WUmbwAnfR9KwUVJKLmiZ+kU3j4jclcEwr8Np9/1rDGzIWXqrNLzEC2BHv2rVw2p7eKg73SWqjNMTihRdbJThwdi1y8ifHe+lkakdOOLjtvlrpK6pqlRCNrmkuL8fxFEp71lN3RRsEYVrQRldcJh7r/XoB/z69BIlEj6i5g8sTRlIDdzwROL2y1V5VpEp+EEfD4BdAU6eZnDgXe3EfujfUWUyYmg/t4R1T9nD3E7zoAXPAE5SeZK/qY/xRyhSaHD51nef/bWyD5NXeKLJsGnkLGU73U0XO/QyhaH3+K387lBDR5OTMoE2PiSgH71aaMEgkTlxQkN6SELP5nopVKQWOgLtfexH0EDk6e7wPUTcfkKOEZGeZCaIJWsm1KlyXNGD9ZB45D5U6A2vImS6dKbDRPnCARJLT6DOhsrmhFyZzVMZr6SBQ4L5EblkzBC+7ow9VS1aoLgU/BmW4/+5sc6uD7e4LiR4bzEZ6EuIbXd5Cj/BoFXTrBS27XlyGBT/9VMzKQHqbb6P938ep4LNAGDhk8l3xaBXZC2rZ7RLGZKMg+6Ov8N3ILppKdP85aJA7CDwiqD1G7r0iZN83HdrTq5WmQKi2Eb2Z+DZxy5JGZn/v0xy2TfgsbOuE15OcMMGC08atSFwHTUtttfRuP+vuHcFmyFO7/bvgP3ONt/Z1l2CUBV9fdOK0jJUbmS8O9OKE1zgG88OdJcy/nDjaqKeVzNkA1MzAaypYRNAKhT00i3Cox2pSG2lcHM0OZf6PDwoNp0LSzdPbmoxCkj0dM+Kf8KP1M5k3D/Z7vQZ2Tkw50zNzyNmZImLsXF90RC1pq6ndgssviDeDxeBBBgnaduJVuNqoxpktmXoQYGKra8GzTN0LZLIoc7D4M4kVfv2OfGUVyoRUvpNpz0mZtmjTKUrw7fe0TnIEzWfYYB4ZvyQF4UZMlsCSOTY1mx27m7FF6y0Nc11BDxVUDk9/BQoNkTlsUolIRIJ5x44R</xb>
+<docu id="PSbyBRDFBig0625">
+<parameters>
+<parameter id="AllImages"/>
+<parameter id="Pose"/>
+<parameter id="ROI"/>
+<parameter id="Slants"/>
+<parameter id="SlopeX"/>
+<parameter id="SlopeY"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="AlliImgs0701">
+<interface>
+<io>
+<par name="InImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="OutImages" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Offset" base_type="ctrl" dimension="0"/>
+<par name="MapFlag" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>select_obj (InImages, XFS, [1,2,3,4])</l>
+<l>select_obj (InImages, XBS, 4+[1,2,3,4])</l>
+<l>select_obj (InImages, YFS, 8+[1,2,3,4])</l>
+<l>select_obj (InImages, YBS, 12+[1,2,3,4])</l>
+<c>* ***********************************************************************</c>
+<c>* rotate_image</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XFS, XF1, 2)</l>
+<l>select_obj (XBS, XB1, 2)</l>
+<l>* add_image (XF2, XB2, ImageResult1, 0.5, 0)</l>
+<l>select_obj (YFS, YF1, 2)</l>
+<l>select_obj (YBS, YB1, 2)</l>
+<l>* add_image (YB2, YF2, ImageResult1, 0.5, 0)</l>
+<c></c>
+<l>GetDxDy0701 (XF1, Logo1, LogoRow1, LogoColumn1, LogoAngle1, Row1, Column1, Angle1, Area)</l>
+<l>GetDxDy0701 (XB1, Logo2, LogoRow2, LogoColumn2, LogoAngle2, Row2, Column2, Angle2, Area1)</l>
+<l>GetDxDy0701 (YF1, Logo3, LogoRow3, LogoColumn3, LogoAngle3, Row3, Column3, Angle3, Area2)</l>
+<l>GetDxDy0701 (YB1, Logo4, LogoRow4, LogoColumn4, LogoAngle4, Row4, Column4, Angle4, Area3)</l>
+<c>* ***********************************************************************</c>
+<l>rotate_image (XFS, XFSRotate, -Angle1, 'constant')</l>
+<l>rotate_image (XBS, XBSRotate, -Angle2, 'constant')</l>
+<l>rotate_image (YFS, YFSRotate, -Angle3, 'constant')</l>
+<l>rotate_image (YBS, YBSRotate, -Angle4, 'constant')</l>
+<l>* rotate_image (Dust1, Dust2, -Angle1, 'constant')</l>
+<c>* ***********************************************************************</c>
+<c>* CropImage</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XFSRotate, XF1, 2)</l>
+<l>select_obj (XBSRotate, XB1, 2)</l>
+<l>select_obj (YFSRotate, YF1, 2)</l>
+<l>select_obj (YBSRotate, YB1, 2)</l>
+<c></c>
+<l>GetDxDy0701 (XF1, Logo1, LogoRow1, LogoColumn1, LogoAngle1, Row1, Column1, Angle1, Area4)</l>
+<l>GetDxDy0701 (XB1, Logo2, LogoRow2, LogoColumn2, LogoAngle2, Row2, Column2, Angle2, Area5)</l>
+<l>GetDxDy0701 (YF1, Logo3, LogoRow3, LogoColumn3, LogoAngle3, Row3, Column3, Angle3, Area6)</l>
+<l>GetDxDy0701 (YB1, Logo4, LogoRow4, LogoColumn4, LogoAngle4, Row4, Column4, Angle4, Area7)</l>
+<l>if (MapFlag)</l>
+<l>    OutImgWith := 14000</l>
+<l>    OutImgHeight := 10000</l>
+<l>else</l>
+<l>    OutImgWith := 14700</l>
+<l>    OutImgHeight := 10400</l>
+<l>endif</l>
+<c></c>
+<l>* dev_display (XF1)</l>
+<l>gen_rectangle2 (CropROI1, Row1, Column1, 0, OutImgWith/2-0.5, OutImgHeight/2-0.5)</l>
+<l>gen_rectangle2 (CropROI2, Row2, Column2, 0, OutImgWith/2-0.5, OutImgHeight/2-0.5)</l>
+<l>gen_rectangle2 (CropROI3, Row3, Column3, 0, OutImgWith/2-0.5, OutImgHeight/2-0.5)</l>
+<l>gen_rectangle2 (CropROI4, Row4, Column4, 0, OutImgWith/2-0.5, OutImgHeight/2-0.5)</l>
+<c></c>
+<l>reduce_domain (XFSRotate, CropROI1, ImageReduced1)</l>
+<l>reduce_domain (XBSRotate, CropROI2, ImageReduced2)</l>
+<l>reduce_domain (YFSRotate, CropROI3, ImageReduced3)</l>
+<l>reduce_domain (YBSRotate, CropROI4, ImageReduced4)</l>
+<l>* reduce_domain (Dust2, CropROI1, ImageReduced5)</l>
+<c></c>
+<l>crop_domain (ImageReduced1, XFSPart)</l>
+<l>crop_domain (ImageReduced2, XBSPart)</l>
+<l>crop_domain (ImageReduced3, YFSPart)</l>
+<l>crop_domain (ImageReduced4, YBSPart)</l>
+<l>* crop_domain (ImageReduced5, DustPart)</l>
+<c>* ***********************************************************************</c>
+<c>* MoveImage</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XFSPart, XF1, 2)</l>
+<l>select_obj (XBSPart, XB1, 2)</l>
+<l>select_obj (YFSPart, YF1, 2)</l>
+<l>select_obj (YBSPart, YB1, 2)</l>
+<l>GetDxDy0701 (XF1, Logo1, LogoRow1, LogoColumn1, LogoAngle1, Row1, Column1, Angle1, Area8)</l>
+<l>GetDxDy0701 (XB1, Logo2, LogoRow2, LogoColumn2, LogoAngle2, Row2, Column2, Angle2, Area9)</l>
+<l>GetDxDy0701 (YF1, Logo3, LogoRow3, LogoColumn3, LogoAngle3, Row3, Column3, Angle3, Area10)</l>
+<l>GetDxDy0701 (YB1, Logo4, LogoRow4, LogoColumn4, LogoAngle4, Row4, Column4, Angle4, Area11)</l>
+<l>RowDiff12 := LogoRow2-LogoRow1</l>
+<l>ColDiff12 := LogoColumn2-LogoColumn1</l>
+<l>* RowDiff12 := Row2-Row1</l>
+<l>* ColDiff12 := Column2-Column1</l>
+<c></c>
+<l>RowDiff13 := LogoRow3-LogoRow1</l>
+<l>ColDiff13 := LogoColumn3-LogoColumn1</l>
+<c></c>
+<l>RowDiff14 := LogoRow4-LogoRow1</l>
+<l>ColDiff14 := LogoColumn4-LogoColumn1</l>
+<c></c>
+<l>RowDiff34 := LogoRow4-LogoRow3</l>
+<l>ColDiff34 := LogoColumn4-LogoColumn3</l>
+<l>* stop ()</l>
+<l>Offset := -0</l>
+<c>* *****************************************************</c>
+<l>MoveImage0701 (XBSPart, XBSMove, -RowDiff12-Offset, -ColDiff12)</l>
+<l>concat_obj (XFSPart, XBSMove, XS)</l>
+<l>* dev_display (XF1)</l>
+<l>* select_obj (XBSMove, XBSMove2, 2)</l>
+<l>* add_image (XF1, XBSMove2, ImageResult, 0.5, 0)</l>
+<l>* stop ()</l>
+<c>* *****************************************************</c>
+<l>MoveImage0701 (YBSPart, YBSMove, -RowDiff34, -ColDiff34-Offset)</l>
+<l>concat_obj (YFSPart, YBSMove, YS)</l>
+<l>* dev_display (YF1)</l>
+<l>* select_obj (YBSMove, YBSMove2, 2)</l>
+<l>* add_image (YF1, YBSMove2, ImageResult, 0.5, 0)</l>
+<l>* stop ()</l>
+<l>* AA := deg(acos(312.0/350))</l>
+<c>* *****************************************************</c>
+<l>MoveImage0701 (YS, YSMove, -RowDiff13-Offset, -ColDiff13+Offset)</l>
+<l>* dev_display (XF1)</l>
+<l>* select_obj (YSMove, YSMove2, 2)</l>
+<l>* add_image (XF1, YSMove2, ImageResult, 0.5, 0)</l>
+<l>* stop ()</l>
+<c></c>
+<l>* dev_display (XF2)</l>
+<l>* dev_display (XBSMove2)</l>
+<l>* dev_display (YFSMove2)</l>
+<l>* dev_display (YBSMove2)</l>
+<l>* stop ()</l>
+<c>* **********************************************************************</c>
+<c>* OUT</c>
+<c>* **********************************************************************</c>
+<l>concat_obj (XS, YSMove, OutImages)</l>
+<l>* concat_obj (OutImages1, DustPart, OutImages)</l>
+<l>return ()</l>
+<c></c>
+<c></c>
+</body>
+<docu id="AlliImgs0701">
+<parameters>
+<parameter id="InImages"/>
+<parameter id="MapFlag"/>
+<parameter id="Offset"/>
+<parameter id="OutImages"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GetDiscolor0701">
+<interface>
+<io>
+<par name="GraysIn" base_type="iconic" dimension="0"/>
+<par name="FFCMaps" base_type="iconic" dimension="0"/>
+<par name="ROI" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Discolors" base_type="iconic" dimension="0"/>
+</oo>
+</interface>
+<body>
+<l>* select_obj (FFCMaps, AlbedoFFC0, 1)</l>
+<l>* select_obj (GraysIn, Albedo0, 1)</l>
+<l>* scale_image_range (Albedo0, ImageScaled, 40, 80)</l>
+<l>* convert_image_type (Albedo0, ImageConverted, 'real')</l>
+<l>* div_image (ImageConverted, AlbedoFFC0, Albedo00, 1, 0)</l>
+<l>* scale_image_range (Albedo00, ImageScaled, 0.4, 0.6)</l>
+<c></c>
+<l>erosion_circle (ROI, ROI1, 115)</l>
+<l>MaenS := 20</l>
+<l>mean_image (GraysIn, GraysInMean, MaenS, MaenS)</l>
+<c>* **********************************************</c>
+<c>* **********************************************</c>
+<l>* zoom_image_factor (FFCMaps, FFCMapsZ, 0.25, 0.25, 'bilinear')</l>
+<l>zoom_image_factor (GraysInMean, GraysInZ, 0.25, 0.25, 'bilinear')</l>
+<l>zoom_region (ROI1, RegionZoom, 0.25, 0.25)</l>
+<c>* **********************************************</c>
+<l>* convert_image_type (FFCMapsZ, FFCMapsZ, 'real')</l>
+<l>convert_image_type (GraysInZ, GraysInZ, 'real')</l>
+<c>* **********************************************</c>
+<l>select_obj (FFCMaps, AlbedoFFC, 1)</l>
+<l>select_obj (FFCMaps, DiffuseFFC, 2)</l>
+<l>select_obj (FFCMaps, RoughnessFFC, 3)</l>
+<c></c>
+<l>select_obj (GraysInZ, Albedo, 1)</l>
+<l>select_obj (GraysInZ, Diffuse, 2)</l>
+<l>select_obj (GraysInZ, Roughness, 3)</l>
+<c>* **********************************************</c>
+<l>intensity (RegionZoom, AlbedoFFC, Mean1, Deviation1)</l>
+<l>intensity (RegionZoom, DiffuseFFC, Mean2, Deviation2)</l>
+<l>intensity (RegionZoom, RoughnessFFC, Mean3, Deviation3)</l>
+<c></c>
+<l>div_image (Albedo, AlbedoFFC, Albedo1, Mean1, 0)</l>
+<l>div_image (Diffuse, DiffuseFFC, Diffuse1, Mean2, 0)</l>
+<l>div_image (Roughness, RoughnessFFC, Roughness1, Mean3, 0)</l>
+<c>* **********************************************</c>
+<l>dlt := 1</l>
+<l>intensity (RegionZoom, Albedo1, Mean, Deviation)</l>
+<l>Deviation := 25</l>
+<l>scale_image_range (Albedo1, AlbedoScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<l>scale_image_max (AlbedoScaled, Albedo4)</l>
+<c></c>
+<l>intensity (RegionZoom, Diffuse1, Mean, Deviation)</l>
+<l>Deviation := 15</l>
+<l>scale_image_range (Diffuse1, DiffuseScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<l>scale_image_max (DiffuseScaled, Diffuse4)</l>
+<c></c>
+<l>intensity (RegionZoom, Roughness1, Mean, Deviation)</l>
+<l>Deviation := 25</l>
+<l>scale_image_range (Roughness1, RoughnessScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<l>scale_image_max (RoughnessScaled, Roughness4)</l>
+<c></c>
+<c>* **********</c>
+<l>sub_image (Roughness4, Diffuse4, Discolor1, 1, 100)</l>
+<c></c>
+<c></c>
+<c>* *out gray</c>
+<l>concat_obj (Albedo4, Diffuse4, ObjectsConcat)</l>
+<l>concat_obj (ObjectsConcat, Roughness4, ObjectsConcat1)</l>
+<l>concat_obj (ObjectsConcat1, Discolor1, Discolors)</l>
+<c></c>
+<l>* dev_display (Albedo4)</l>
+<l>* dev_display (Diffuse4)</l>
+<l>* dev_display (Roughness4)</l>
+<l>* dev_display (ChZoomed)</l>
+<l>* dev_display (Discolor1Zoomed)</l>
+<l>* dev_display (Discolor2Zoomed)</l>
+<l>* stop ()</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="GetDiscolor0701">
+<parameters>
+<parameter id="Discolors"/>
+<parameter id="FFCMaps"/>
+<parameter id="GraysIn"/>
+<parameter id="ROI"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="LoadSplitImages">
+<interface>
+<oo>
+<par name="SplitedImages" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="ImagesFold3" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>list_image_files (ImagesFold3, 'default', [], ImageFiles)</l>
+<l>ImgNum := |ImageFiles|</l>
+<l>gen_empty_obj (RawImages)</l>
+<l>for Index := 0 to ImgNum-1 by 1</l>
+<l>    CurrentImgFile := ImageFiles[Index]</l>
+<l>parse_filename (CurrentImgFile, BaseName, Extension, Directory)</l>
+<l>    tuple_strlen (BaseName, Len)</l>
+<l>*     tuple_substr (BaseName, Len-2, Len-1, Substring)</l>
+<l>    if (BaseName='XF-1')</l>
+<l>        read_image (XF1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XF-2')</l>
+<l>        read_image (XF2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XF-3')</l>
+<l>        read_image (XF3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XF-4')</l>
+<l>        read_image (XF4, ImageFiles[Index])</l>
+<l>    endif</l>
+<c></c>
+<l>    if (BaseName='XB-1')</l>
+<l>        read_image (XB1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XB-2')</l>
+<l>        read_image (XB2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XB-3')</l>
+<l>        read_image (XB3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XB-4')</l>
+<l>        read_image (XB4, ImageFiles[Index])</l>
+<l>    endif</l>
+<c></c>
+<l>    if (BaseName='YF-1')</l>
+<l>        read_image (YF1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YF-2')</l>
+<l>        read_image (YF2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YF-3')</l>
+<l>        read_image (YF3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YF-4')</l>
+<l>        read_image (YF4, ImageFiles[Index])</l>
+<l>    endif</l>
+<c></c>
+<l>    if (BaseName='YB-1')</l>
+<l>        read_image (YB1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YB-2')</l>
+<l>        read_image (YB2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YB-3')</l>
+<l>        read_image (YB3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YB-4')</l>
+<l>        read_image (YB4, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>endfor</l>
+<c></c>
+<l>concat_obj (XF1, XF2, ObjectsConcat2)</l>
+<l>concat_obj (ObjectsConcat2, XF3, ObjectsConcat3)</l>
+<l>concat_obj (ObjectsConcat3, XF4, XFS)</l>
+<c></c>
+<l>concat_obj (XB1, XB2, ObjectsConcat2)</l>
+<l>concat_obj (ObjectsConcat2, XB3, ObjectsConcat3)</l>
+<l>concat_obj (ObjectsConcat3, XB4, XBS)</l>
+<c></c>
+<l>concat_obj (YF1, YF2, ObjectsConcat2)</l>
+<l>concat_obj (ObjectsConcat2, YF3, ObjectsConcat3)</l>
+<l>concat_obj (ObjectsConcat3, YF4, YFS)</l>
+<c></c>
+<l>concat_obj (YB1, YB2, ObjectsConcat2)</l>
+<l>concat_obj (ObjectsConcat2, YB3, ObjectsConcat3)</l>
+<l>concat_obj (ObjectsConcat3, YB4, YBS)</l>
+<c></c>
+<l>concat_obj (XFS, XBS, xs)</l>
+<l>concat_obj (YFS, YBS, ys)</l>
+<l>concat_obj (xs, ys, SplitedImages)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="LoadSplitImages">
+<parameters>
+<parameter id="ImagesFold3"/>
+<parameter id="SplitedImages"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GetROI0701">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="ROI" base_type="iconic" dimension="0"/>
+<par name="TextureROI" base_type="iconic" dimension="0"/>
+</oo>
+<oc>
+<par name="LogoRow" base_type="ctrl" dimension="0"/>
+<par name="LogoColumn" base_type="ctrl" dimension="0"/>
+<par name="Angle" base_type="ctrl" dimension="0"/>
+<par name="Length1" base_type="ctrl" dimension="0"/>
+<par name="Length2" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c></c>
+<l>* dev_display (Image)</l>
+<l>get_image_size (Image, Width, Height)</l>
+<l>binary_threshold (Image, Region, 'max_separability', 'light', UsedThreshold)</l>
+<l>threshold (Image, Regions, UsedThreshold, 255)</l>
+<l>fill_up (Regions, RegionFillUp)</l>
+<l>closing_circle (RegionFillUp, RegionClosing, 25)</l>
+<l>opening_circle (RegionClosing, RegionOpening, 35)</l>
+<l>connection (RegionOpening, ConnectedRegions)</l>
+<l>select_shape_std (ConnectedRegions, PartRegion, 'max_area', 70)</l>
+<l>shape_trans (PartRegion, PartRegion, 'convex')</l>
+<l>smallest_rectangle2 (PartRegion, Row, Column, Phi, Length1, Length2)</l>
+<l>gen_rectangle2 (PartRect2, Row, Column, Phi, Length1, Length2)</l>
+<l>Angle := deg(Phi)</l>
+<c>* *PartEdge*******************************************************************</c>
+<l>dilation_circle (PartRegion, PartDilation, 10)</l>
+<l>difference (PartDilation, PartRegion, PartEdge)</l>
+<l>skeleton (PartEdge, EdgeSkeleton)</l>
+<c>* up</c>
+<l>gen_rectangle2 (Uproi, Row-Length2, Column, Phi, Length1-500, 250)</l>
+<l>intersection (Uproi, EdgeSkeleton, Skeleton)</l>
+<l>gen_contours_skeleton_xld (Skeleton, Contours, 1, 'filter')</l>
+<l>fit_line_contour_xld (Contours, 'tukey', -1, 0, 5, 2, RowBegin, ColBegin, RowEnd, ColEnd, Nr, Nc, Dist)</l>
+<l>gen_region_line (UpLine1, RowBegin, ColBegin, RowEnd, ColEnd)</l>
+<c></c>
+<l>intersection_lines (RowBegin, ColBegin, RowEnd, ColEnd, 0, 0, Height, 0, RowUp1, ColumnUp1, IsOverlapping)</l>
+<l>intersection_lines (RowBegin, ColBegin, RowEnd, ColEnd, 0, Width, Height, Width, RowUp2, ColumnUp2, IsOverlapping)</l>
+<l>gen_region_line (UpLine, RowUp1, ColumnUp1, RowUp2, ColumnUp2)</l>
+<l>angle_ll (0, 0, 0, Width, RowUp1, ColumnUp1, RowUp2, ColumnUp2, Angle1)</l>
+<l>AngleUp := deg(Angle1)</l>
+<c>* down</c>
+<l>gen_rectangle2 (Downroi, Row+Length2, Column, Phi, Length1-500, 250)</l>
+<l>intersection (Downroi, EdgeSkeleton, Skeleton)</l>
+<l>gen_contours_skeleton_xld (Skeleton, Contours, 1, 'filter')</l>
+<l>fit_line_contour_xld (Contours, 'tukey', -1, 0, 5, 2, RowBegin, ColBegin, RowEnd, ColEnd, Nr, Nc, Dist)</l>
+<l>gen_region_line (DownLine1, RowBegin, ColBegin, RowEnd, ColEnd)</l>
+<c></c>
+<l>intersection_lines (RowBegin, ColBegin, RowEnd, ColEnd, 0, 0, Height, 0, RowDown1, ColumnDown1, IsOverlapping)</l>
+<l>intersection_lines (RowBegin, ColBegin, RowEnd, ColEnd, 0, Width, Height, Width, RowDown2, ColumnDown2, IsOverlapping)</l>
+<l>gen_region_line (DownLine, RowDown1, ColumnDown1, RowDown2, ColumnDown2)</l>
+<l>angle_ll (0, 0, 0, Width, RowDown1, ColumnDown1, RowDown2, ColumnDown2, Angle1)</l>
+<l>AngleDown := deg(Angle1)</l>
+<c>* left</c>
+<l>gen_rectangle2 (Leftroi, Row, Column-Length1, Phi, 250, Length2-500)</l>
+<l>intersection (Leftroi, EdgeSkeleton, Skeleton)</l>
+<l>gen_contours_skeleton_xld (Skeleton, Contours, 1, 'filter')</l>
+<l>fit_line_contour_xld (Contours, 'tukey', -1, 0, 5, 2, RowBegin, ColBegin, RowEnd, ColEnd, Nr, Nc, Dist)</l>
+<l>gen_region_line (LeftLine1, RowBegin, ColBegin, RowEnd, ColEnd)</l>
+<c></c>
+<l>intersection_lines (RowBegin, ColBegin, RowEnd, ColEnd, 0, 0, 0, Width, RowLeft1, ColumnLeft1, IsOverlapping)</l>
+<l>intersection_lines (RowBegin, ColBegin, RowEnd, ColEnd, Height, 0, Height, Width, RowLeft2, ColumnLeft2, IsOverlapping)</l>
+<l>gen_region_line (LeftLine, RowLeft1, ColumnLeft1, RowLeft2, ColumnLeft2)</l>
+<l>angle_ll (0, 0, Height, 0, RowLeft1, ColumnLeft1, RowLeft2, ColumnLeft2, Angle1)</l>
+<l>AngleLeft := deg(Angle1)</l>
+<c>* right</c>
+<l>gen_rectangle2 (Rightroi, Row, Column+Length1, Phi, 250, Length2-500)</l>
+<l>intersection (Rightroi, EdgeSkeleton, Skeleton)</l>
+<l>gen_contours_skeleton_xld (Skeleton, Contours, 1, 'filter')</l>
+<l>fit_line_contour_xld (Contours, 'tukey', -1, 0, 5, 2, RowBegin, ColBegin, RowEnd, ColEnd, Nr, Nc, Dist)</l>
+<l>gen_region_line (RightLine1, RowBegin, ColBegin, RowEnd, ColEnd)</l>
+<c></c>
+<l>intersection_lines (RowBegin, ColBegin, RowEnd, ColEnd, 0, 0, 0, Width, RowRight1, ColumnRight1, IsOverlapping)</l>
+<l>intersection_lines (RowBegin, ColBegin, RowEnd, ColEnd, Height, 0, Height, Width, RowRight2, ColumnRight2, IsOverlapping)</l>
+<l>gen_region_line (RightLine, RowRight1, ColumnRight1, RowRight2, ColumnRight2)</l>
+<l>angle_ll (0, 0, Height, 0, RowRight1, ColumnRight1, RowRight2, ColumnRight2, Angle1)</l>
+<l>AngleRight := deg(Angle1)</l>
+<c>* *</c>
+<l>union2 (UpLine, DownLine, RegionUnion1)</l>
+<l>union2 (LeftLine, RightLine, RegionUnion2)</l>
+<l>union2 (RegionUnion1, RegionUnion2, FourLines)</l>
+<l>fill_up (FourLines, LineFillUp2)</l>
+<l>opening_rectangle1 (LineFillUp2, PartLineRegion, 2, 2)</l>
+<l>area_center (PartLineRegion, Area1, RowCenter, ColumnCenter)</l>
+<l>gen_rectangle2 (CenterX, RowCenter, ColumnCenter, mean(rad([AngleUp,AngleDown])), Width/2, 1)</l>
+<l>gen_rectangle2 (CenterY, RowCenter, ColumnCenter, mean(rad([AngleLeft,AngleRight])), 1, Height/2)</l>
+<l>opening_circle (LineFillUp2, LineRegion, 3.5)</l>
+<c></c>
+<l>smallest_rectangle2 (LineRegion, Row1, Column1, Phi1, Length11, Length21)</l>
+<l>AngleRect2 := deg(Phi1)</l>
+<l>diffAngle := AngleRect2-Angle</l>
+<l>diffLen1 := Length11-Length1</l>
+<l>diffLen2 := Length21-Length2</l>
+<l>Angles := [AngleUp,AngleDown,AngleLeft,AngleRight]</l>
+<l>AngleMean := mean(Angles[0:1])</l>
+<c></c>
+<l>* dilation_circle (PartRegion, RegionDilation, 10)</l>
+<l>difference (PartLineRegion, PartDilation, RegionDifference)</l>
+<l>difference (PartLineRegion, RegionDifference, PartROI)</l>
+<l>* dev_display (Image)</l>
+<l>* dev_display (PartROI)</l>
+<l>* stop ()</l>
+<c>* ********************************************************************</c>
+<c></c>
+<l>gen_rectangle2 (RegionErosion, Row1, Column1, Phi1, Length11/2, Length21/2)</l>
+<l>reduce_domain (Image, RegionErosion, ImageReduced)</l>
+<l>binary_threshold (ImageReduced, Region, 'max_separability', 'light', UsedThreshold)</l>
+<l>threshold (ImageReduced, Region1, 0, UsedThreshold)</l>
+<l>opening_circle (Region1, RegionOpening, 5)</l>
+<l>fill_up (RegionOpening, RegionFillUp1)</l>
+<l>connection (RegionFillUp1, ConnectedRegions)</l>
+<l>select_shape_std (ConnectedRegions, Logo1, 'max_area', 70)</l>
+<l>difference (ConnectedRegions, Logo1, RegionDifference1)</l>
+<l>select_shape_std (RegionDifference1, Logo2, 'max_area', 70)</l>
+<l>union2 (Logo1, Logo2, Logo)</l>
+<l>union1 (Logo, Logo)</l>
+<l>area_center (Logo, Area, LogoRow1, LogoColumn1)</l>
+<l>difference (PartROI, Logo, ROI)</l>
+<l>* concat_obj (Logo, PartLineRegion, ROI)</l>
+<c></c>
+<l>Angle := AngleMean</l>
+<c></c>
+<l>LogoRow := Row</l>
+<l>LogoColumn := Column</l>
+<c></c>
+<l>LogoRow := LogoRow1</l>
+<l>LogoColumn := LogoColumn1</l>
+<c></c>
+<l>DiffRow := LogoRow1-Row</l>
+<l>DiffCol := LogoColumn1-Column</l>
+<c></c>
+<l>DiffRow1 := LogoRow1-RowCenter</l>
+<l>DiffCol1 := LogoColumn1-ColumnCenter</l>
+<c></c>
+<l>DiffRow2 := Row-RowCenter</l>
+<l>DiffCol2 := Column-ColumnCenter</l>
+<c></c>
+<c></c>
+<l>* dev_display (Image)</l>
+<l>* dev_display (Logo)</l>
+<l>* dev_display (PartRegion)</l>
+<l>* dev_display (PartLineRegion)</l>
+<l>* stop ()</l>
+<l>shape_trans (Logo1, RegionTrans, 'convex')</l>
+<c>* *********************************************************</c>
+<l>area_center (RegionTrans, Area1, Row3, Column3)</l>
+<l>gen_circle (Circle, Row3, Column3, 30)</l>
+<l>gen_rectangle2 (Rectangle2, Row3, Column3, 0, 0, 2000)</l>
+<l>intersection (RegionTrans, Rectangle2, Line)</l>
+<l>area_center (Line, AreaLine, Row4, Column4)</l>
+<l>* dev_display (Image)</l>
+<l>* dev_display (RegionTrans)</l>
+<l>* dev_display (Line)</l>
+<l>* dev_display (Rectangle)</l>
+<l>* TextOffset := 2000</l>
+<l>Wind := 256</l>
+<l>gen_rectangle1 (TextureROI1, int(Row1-Length21/2)-Wind*1, int(Column1)-Wind, int(Row1-Length21/2)+Wind-1, int(Column1)+Wind-1)</l>
+<l>gen_rectangle1 (TextureROI2, int(Row1+Length21/2)-Wind*1, int(Column1)-Wind, int(Row1+Length21/2)+Wind*1-1, int(Column1)+Wind-1)</l>
+<l>gen_rectangle1 (TextureROI3, int(Row1)-Wind*1, int(Column1-Length11/2)-Wind, int(Row1)+Wind*1-1, int(Column1-Length11/2)+Wind-1)</l>
+<l>gen_rectangle1 (TextureROI4, int(Row1)-Wind*1, int(Column1+Length11/2)-Wind, int(Row1)+Wind*1-1, int(Column1+Length11/2)+Wind-1)</l>
+<l>concat_obj (TextureROI1, TextureROI2, ObjectsConcat)</l>
+<l>concat_obj (ObjectsConcat, TextureROI3, ObjectsConcat1)</l>
+<l>concat_obj (ObjectsConcat1, TextureROI4, TextureROI)</l>
+<l>* dev_display (Image)</l>
+<l>* dev_display (ROI)</l>
+<l>* dev_display (TextureROI)</l>
+<l>* stop ()</l>
+<l>return ()</l>
+</body>
+<docu id="GetROI0701">
+<parameters>
+<parameter id="Angle"/>
+<parameter id="Image"/>
+<parameter id="Length1"/>
+<parameter id="Length2"/>
+<parameter id="LogoColumn"/>
+<parameter id="LogoRow"/>
+<parameter id="ROI"/>
+<parameter id="TextureROI"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="Pre0701">
+<interface>
+<io>
+<par name="SplitedImages" base_type="iconic" dimension="0"/>
+<par name="FFCMaps" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="GrayImages" base_type="iconic" dimension="0"/>
+<par name="CurImages" base_type="iconic" dimension="0"/>
+<par name="ROI" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D1" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D2" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D3" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D4" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<l>if (Slants !=[94.857,85.789,64.785,45.834,25.476,5.614] or       Pose !=[0.005624, 0.09468, 0.95422 ,305.157, 0.1563, 269.5045, 0,           0.003648, 0.09757, 0.96910, 304.865, 0.1159, 269.5478, 0,           -0.02468, 0.09273, 0.97608, 304.782, 359.8324, 269.4963, 0,          0.002156, 0.09684, 0.96504, 305.136, 0.1204 ,269.5386, 0 ])</l>
+<l>*     stop ()</l>
+<l>    return ()</l>
+<l>endif</l>
+<l>count_seconds (T1)</l>
+<c>* *********************************************************************************</c>
+<c>* Split Images</c>
+<c>* *********************************************************************************</c>
+<l>select_obj (SplitedImages, XF, 0*4+[1,2,3,4])</l>
+<l>select_obj (SplitedImages, XB, 1*4+[1,2,3,4])</l>
+<l>select_obj (SplitedImages, YF, 2*4+[1,2,3,4])</l>
+<l>select_obj (SplitedImages, YB, 3*4+[1,2,3,2])</l>
+<c>* **********************************************************************</c>
+<c>* mirror_image</c>
+<c>* ***********************************************************************</c>
+<l>get_image_size (XB, Width, Height)</l>
+<l>mirror_image (XF, XFMirr, 'column')</l>
+<l>mirror_image (YF, YFMirr, 'column')</l>
+<l>rotate_image (YFMirr, YFRot, 90, 'constant')</l>
+<l>rotate_image (YB, YBRot, 90, 'constant')</l>
+<l>count_seconds (T2)</l>
+<l>Timemirror_image := T2-T1</l>
+<c></c>
+<c>* **********************************************************************</c>
+<c>* map_image  GPU NULL</c>
+<c>* ***********************************************************************</c>
+<l>count_seconds (T1)</l>
+<c></c>
+<l>MapFlag := 1</l>
+<l>if (MapFlag)</l>
+<l>    projective_trans_image_size (XFMirr, XFS, HomMat2D1, 'nearest_neighbor', 15000, 11000, 'false')</l>
+<l>    projective_trans_image_size (XB, XBS, HomMat2D2, 'nearest_neighbor', 15000, 11000, 'false')</l>
+<l>    projective_trans_image_size (YFRot, YFS, HomMat2D3, 'nearest_neighbor', 15000, 11000, 'false')</l>
+<l>    projective_trans_image_size (YBRot, YBS, HomMat2D4, 'nearest_neighbor', 15000, 11000, 'false')</l>
+<l>else</l>
+<l>    XFS := XFMirr</l>
+<l>    XBS := XB</l>
+<l>    YFS := YFRot</l>
+<l>    YBS := YBRot</l>
+<l>endif</l>
+<l>count_seconds (T2)</l>
+<l>TimeALL := T2-T1</l>
+<c></c>
+<l>count_seconds (T1)</l>
+<c>* ***********************************************************************</c>
+<c>* AlliImgs 5432 5432  5416 5416   5432 5432   5412 54</c>
+<c>* ***********************************************************************</c>
+<l>concat_obj (XFS, XBS, AllImgs2)</l>
+<l>concat_obj (AllImgs2, YFS, AllImgs1)</l>
+<l>concat_obj (AllImgs1, YBS, AllImgs)</l>
+<l>count_seconds (S1)</l>
+<l>Offset := 0</l>
+<l>AlliImgs0701 (AllImgs, AllImages, Offset, MapFlag)</l>
+<l>select_obj (AllImages, ObjectSelected, 8)</l>
+<l>scale_image_range (ObjectSelected, Dust, 0, 20)</l>
+<l>scale_image_max (Dust, Dust)</l>
+<l>count_seconds (S2)</l>
+<l>TimeAlli := S2-S1</l>
+<c>* ****</c>
+<l>count_seconds (T2)</l>
+<l>TimeAlliImgs := T2-T1</l>
+<c></c>
+<c>* ***********************************************************************</c>
+<c>* Albedo</c>
+<c>* ***********************************************************************</c>
+<l>count_seconds (S1)</l>
+<l>GetAlbedo0701 (AllImages, Albedo, Diffuse, Roughness)</l>
+<l>count_seconds (S2)</l>
+<l>TimeGetAlbedo0614 := S2-S1</l>
+<c></c>
+<l>count_seconds (T1)</l>
+<l>GetROI0701 (Albedo, ROI, TextureROI, LogoRow1, LogoColumn1, Angle1, Length11, Length21)</l>
+<l>count_seconds (T2)</l>
+<l>TimeAlbedo := T2-T1</l>
+<c>* ***********************************************************************</c>
+<c>* reduce</c>
+<c>* ***********************************************************************</c>
+<l>dilation_circle (ROI, ROIDilation, 15)</l>
+<l>reduce_domain (AllImages, ROIDilation, AllImages)</l>
+<c></c>
+<c>* ***********************************************************************</c>
+<c>* Discolor 5432 5432  5416 5416   5432 5432   5412 54</c>
+<c>* ***********************************************************************</c>
+<l>count_seconds (T1)</l>
+<l>select_obj (AllImages, Ch1X0, 7)</l>
+<l>concat_obj (Albedo, Diffuse, ObjectsConcat)</l>
+<l>concat_obj (ObjectsConcat, Roughness, ObjectsConcat1)</l>
+<l>concat_obj (ObjectsConcat1, Ch1X0, GraysIn)</l>
+<c></c>
+<l>* select_obj (Maps, FFCMaps, [5,6,7,8])</l>
+<l>GetDiscolor0701 (GraysIn, FFCMaps, ROI, Discolors)</l>
+<c></c>
+<l>count_seconds (T2)</l>
+<l>TimeAlbedo := T2-T1</l>
+<c></c>
+<l>* stop ()</l>
+<c>* ***********************************************************************</c>
+<c>* Texture</c>
+<c>* ***********************************************************************</c>
+<l>erosion_circle (ROI, RegionErosion, 95)</l>
+<l>dlt := 10</l>
+<l>select_obj (AllImages, Ch1X0, 7)</l>
+<l>intensity (RegionErosion, Ch1X0, MeanX, DeviationX)</l>
+<l>DeviationX := 5</l>
+<l>scale_image_range (Ch1X0, Ch1X, MeanX-DeviationX*dlt, MeanX+DeviationX*dlt)</l>
+<l>scale_image_max (Ch1X, Ch1X)</l>
+<c>* ************************************</c>
+<l>select_obj (TextureROI, TextureROI1, 1)</l>
+<l>select_obj (TextureROI, TextureROI2, 2)</l>
+<l>select_obj (TextureROI, TextureROI3, 3)</l>
+<l>select_obj (TextureROI, TextureROI4, 4)</l>
+<l>reduce_domain (Ch1X, TextureROI1, ImageReduced)</l>
+<l>crop_domain (ImageReduced, UpImg)</l>
+<l>reduce_domain (Ch1X, TextureROI2, ImageReduced)</l>
+<l>crop_domain (ImageReduced, DownImg)</l>
+<l>reduce_domain (Ch1X, TextureROI3, ImageReduced)</l>
+<l>crop_domain (ImageReduced, LeftImg)</l>
+<l>reduce_domain (Ch1X, TextureROI4, ImageReduced)</l>
+<l>crop_domain (ImageReduced, RightImg)</l>
+<c>* ********************************************</c>
+<l>concat_obj (UpImg, DownImg, ObjectsConcat)</l>
+<l>concat_obj (ObjectsConcat, LeftImg, ObjectsConcat1)</l>
+<l>concat_obj (ObjectsConcat1, RightImg, TextureCrops)</l>
+<l>* stop ()</l>
+<c></c>
+<c></c>
+<c></c>
+<c>* ***********************************************************************</c>
+<c>* Slope</c>
+<c>* ***********************************************************************</c>
+<c>* small defect</c>
+<c>* *5432 5432  5416 5416   5432 5432   5412 54</c>
+<c>* small defect</c>
+<l>select_obj (AllImages, XS, [1,4])</l>
+<l>select_obj (AllImages, YS, [9,12])</l>
+<l>Slants :=[-20.545,21.487]</l>
+<l>LinePSbyBRDF_0701 (XS, AlbedoX, Sy, Slants)</l>
+<l>LinePSbyBRDF_0701 (YS, AlbedoX, Sx, Slants)</l>
+<l>dlt := 150</l>
+<l>CurBySlope0625 (Sx, Sy, XCur1, YCur1, MeanCur1, 2, dlt)</l>
+<c></c>
+<c>* ***********************************************************************</c>
+<c>* texture</c>
+<c>* ***********************************************************************</c>
+<l>ZoomS := 1</l>
+<l>zoom_image_factor (XCur1, ImageZoomed, ZoomS, ZoomS, 'bilinear')</l>
+<l>zoom_image_factor (YCur1, ImageZoomed, ZoomS, ZoomS, 'bilinear')</l>
+<l>texture_laws (ImageZoomed, XCur1Texture, 'le', 3, 5)</l>
+<l>texture_laws (ImageZoomed, YCur1Texture, 'el', 3, 5)</l>
+<l>mean_image (XCur1Texture, XMean, 20, 20)</l>
+<l>mean_image (YCur1Texture, YMean, 20, 20)</l>
+<l>concat_obj (XMean, YMean, MeanCur1)</l>
+<l>* stop ()</l>
+<c>* ***********************************************************************</c>
+<c>* Crop</c>
+<c>* ***********************************************************************</c>
+<l>* CropImagesByMN (XMean, CropsXCur1)</l>
+<l>* CropImagesByMN (YMean, CropsYCur1)</l>
+<l>* concat_obj (CropsXCur1, CropsYCur1, CropsCur1)</l>
+<c></c>
+<c>* ***********************************************************************</c>
+<c>* big defect</c>
+<c>* 5432 5432 / 5416 5416 /  5432 5432   /5412 54</c>
+<c>* big defect</c>
+<l>select_obj (AllImages, XS, [1,5])</l>
+<l>select_obj (AllImages, YS, [9,13])</l>
+<l>get_image_size (AllImages, Width1, Height1)</l>
+<l>Width1 := Width1[0]</l>
+<l>Height1 := Height1[0]</l>
+<l>Scale1 := 0.5</l>
+<l>zoom_image_size (XS, XSS2, Width1*Scale1, Height1*Scale1, 'constant')</l>
+<l>zoom_image_size (YS, YSS2, Width1*Scale1, Height1*Scale1, 'constant')</l>
+<l>zoom_region (ROI, ROIS2, Scale1, Scale1)</l>
+<c></c>
+<l>* Slants := 0</l>
+<l>erosion_circle (ROIS2, StiROI, 100)</l>
+<l>Slants :=[-20.545,21.487]</l>
+<l>LinePSbyBRDF_0701 (XSS2, AlbedoX, SlopeY, Slants)</l>
+<l>LinePSbyBRDF_0701 (YSS2, AlbedoX, SlopeX, Slants)</l>
+<c>* ***********************************************************************</c>
+<c>* CurBySlopes</c>
+<c>* ***********************************************************************</c>
+<l>get_image_size (SlopeX, Width1, Height1)</l>
+<c>* ********************</c>
+<l>count_seconds (S1)</l>
+<l>dlt := 30</l>
+<l>CurBySlope0625 (SlopeX, SlopeY, XCur2, YCur2, MeanCur2, 3, dlt)</l>
+<l>count_seconds (S2)</l>
+<l>TimeCurBySlope1 := S2-S1</l>
+<l>* stop ()</l>
+<c>* ********************</c>
+<l>count_seconds (S1)</l>
+<l>Scale2 := 0.25*2</l>
+<l>zoom_image_size (SlopeX, SlopeXS4, Width1*Scale2, Height1*Scale2, 'bilinear')</l>
+<l>zoom_image_size (SlopeY, SlopeYS4, Width1*Scale2, Height1*Scale2, 'bilinear')</l>
+<l>dlt := 2</l>
+<l>CurBySlope0625 (SlopeXS4, SlopeYS4, XCur4, YCur4, MeanCur4, 9, dlt)</l>
+<l>count_seconds (S2)</l>
+<l>TimeCurBySlope2 := S2-S1</l>
+<l>* stop ()</l>
+<c>* ********************</c>
+<l>count_seconds (S1)</l>
+<l>Scale3 := 0.125*2</l>
+<l>zoom_image_size (SlopeX, SlopeXS8, Width1*Scale3, Height1*Scale3, 'bilinear')</l>
+<l>zoom_image_size (SlopeY, SlopeYS8, Width1*Scale3, Height1*Scale3, 'bilinear')</l>
+<l>dlt := 2</l>
+<l>CurBySlope0625 (SlopeXS8, SlopeYS8, XCur8, YCur8, MeanCur8, 13, dlt)</l>
+<l>count_seconds (S2)</l>
+<l>TimeCurBySlope3 := S2-S1</l>
+<l>* stop ()</l>
+<c>* *********************************************************************************</c>
+<c>* 2 倍 与 4 倍 融合 刀纹XXYCur24，PSS MeanCur24</c>
+<c>* *********************************************************************************</c>
+<l>zoom_image_size (XCur2, XCur2Z, Width1*Scale2, Height1*Scale2, 'bilinear')</l>
+<l>zoom_image_size (YCur2, YCur2Z, Width1*Scale2, Height1*Scale2, 'bilinear')</l>
+<l>zoom_image_size (MeanCur2, MeanCur2Z, Width1*Scale2, Height1*Scale2, 'bilinear')</l>
+<l>zoom_image_size (Albedo, AlbedoZ, Width1*Scale2, Height1*Scale2, 'bilinear')</l>
+<l>add_image (XCur2Z, XCur4, XCur24, 0.5, 0)</l>
+<l>add_image (YCur2Z, YCur4, YCur24, 0.5, 0)</l>
+<l>add_image (MeanCur2Z, MeanCur4, MeanCur24, 0.5, 0)</l>
+<l>compose3 (XCur24, YCur24, AlbedoZ, Cur24XYA)</l>
+<c>* crop 4 corners</c>
+<l>WidthCrop := 1000</l>
+<l>HeightCrop := 800</l>
+<l>get_image_size (MeanCur4, Width1, Height1)</l>
+<l>gen_rectangle1 (Rectangle1, 0, 0, HeightCrop-1, WidthCrop-1)</l>
+<l>gen_rectangle1 (Rectangle2, 0, Width1-WidthCrop, HeightCrop-1, Width1-1)</l>
+<l>gen_rectangle1 (Rectangle3, Height1-HeightCrop, 0, Height1-1, WidthCrop-1)</l>
+<l>gen_rectangle1 (Rectangle4, Height1-HeightCrop, Width1-WidthCrop, Height1-1, Width1-1)</l>
+<l>reduce_domain (Cur24XYA, Rectangle1, ImageReduced1)</l>
+<l>reduce_domain (Cur24XYA, Rectangle2, ImageReduced2)</l>
+<l>reduce_domain (Cur24XYA, Rectangle3, ImageReduced3)</l>
+<l>reduce_domain (Cur24XYA, Rectangle4, ImageReduced4)</l>
+<l>crop_domain (ImageReduced1, Corner1)</l>
+<l>crop_domain (ImageReduced2, Corner2)</l>
+<l>crop_domain (ImageReduced3, Corner3)</l>
+<l>crop_domain (ImageReduced4, Corner4)</l>
+<c>* *********************************************************************************</c>
+<c>* 4 倍 与 8 倍 融合 PSS MeanCur84</c>
+<c>* *********************************************************************************</c>
+<l>get_image_size (MeanCur4, Width1, Height1)</l>
+<l>Scale2 := 1</l>
+<l>zoom_image_size (XCur8, XCur8Z, Width1*Scale2, Height1*Scale2, 'bilinear')</l>
+<l>zoom_image_size (YCur8, YCur8Z, Width1*Scale2, Height1*Scale2, 'bilinear')</l>
+<l>zoom_image_size (MeanCur8, MeanCur8Z, Width1*Scale2, Height1*Scale2, 'bilinear')</l>
+<l>add_image (XCur8Z, XCur4, XCur84, 0.5, 0)</l>
+<l>add_image (YCur8Z, YCur4, YCur84, 0.5, 0)</l>
+<l>add_image (MeanCur8Z, MeanCur4, MeanCur84, 0.5, 0)</l>
+<l>wait_seconds (3)</l>
+<l>add_image (MeanCur2Z, MeanCur8Z, MeanCur28, 0.5, 0)</l>
+<l>add_image (MeanCur28, MeanCur4, MeanCur842, 0.5, 0)</l>
+<c>* *********************************************************************************</c>
+<c>* OUT Gray</c>
+<c>* *********************************************************************************</c>
+<l>concat_obj (Albedo, Diffuse, ObjectsConcat)</l>
+<l>concat_obj (ObjectsConcat, Roughness, ObjectsConcat1)</l>
+<l>concat_obj (ObjectsConcat1, Dust, GrayImages1)</l>
+<l>* concat_obj (GrayImages1, Ch1X, GrayImages2)</l>
+<l>concat_obj (GrayImages1, TextureCrops, GrayImages5)</l>
+<l>concat_obj (GrayImages5, Discolors, GrayImages)</l>
+<c></c>
+<c>* *********************************************************************************</c>
+<c>* OUT Cur</c>
+<c>* *********************************************************************************</c>
+<l>concat_obj (XCur1, YCur1, CurS1)</l>
+<c></c>
+<l>concat_obj (XCur2, YCur2, ObjectsConcat)</l>
+<l>concat_obj (ObjectsConcat, MeanCur2, CurS2)</l>
+<c></c>
+<l>concat_obj (XCur4, YCur4, ObjectsConcat)</l>
+<l>concat_obj (ObjectsConcat, MeanCur4, CurS4)</l>
+<c></c>
+<l>concat_obj (XCur8, YCur8, ObjectsConcat)</l>
+<l>concat_obj (ObjectsConcat, MeanCur8, CurS8)</l>
+<c></c>
+<l>concat_obj (CurS1, CurS2, ObjectsConcat3)</l>
+<l>concat_obj (ObjectsConcat3, CurS4, CurImages1)</l>
+<l>concat_obj (CurImages1, CurS8, CurImages2)</l>
+<c></c>
+<l>concat_obj (CurImages2, Cur24XYA, CurImages3)</l>
+<l>concat_obj (CurImages3, Corner1, CurImages4)</l>
+<l>concat_obj (CurImages4, Corner2, CurImages5)</l>
+<l>concat_obj (CurImages5, Corner3, CurImages6)</l>
+<l>concat_obj (CurImages6, Corner4, CurImages7)</l>
+<l>concat_obj (CurImages7, MeanCur24, CurImages8)</l>
+<l>concat_obj (CurImages8, MeanCur84, CurImages9)</l>
+<l>concat_obj (CurImages9, MeanCur842, CurImages10)</l>
+<l>concat_obj (CurImages10, MeanCur1, CurImages)</l>
+<c></c>
+<c></c>
+<c>* *********************************************************************************</c>
+<c>* OUT check</c>
+<c>* *********************************************************************************</c>
+<l>get_image_size (GrayImages1, Width3, Height3)</l>
+<l>get_image_size (CurS1, Width4, Height4)</l>
+<l>WidthMin := min([Width3,Width4])</l>
+<l>WidthMax := max([Width3,Width4])</l>
+<l>HeightMin := min([Height3,Height4])</l>
+<l>HeightMax := max([Height3,Height4])</l>
+<l>if (WidthMin!=14000 or WidthMax!=14000 or HeightMin!=10000 or HeightMax!=10000)</l>
+<l>*     stop ()</l>
+<l>endif</l>
+<l>* stop ()</l>
+<c></c>
+<c></c>
+<l>return ()</l>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="Pre0701">
+<parameters>
+<parameter id="CurImages"/>
+<parameter id="FFCMaps"/>
+<parameter id="GrayImages"/>
+<parameter id="HomMat2D1"/>
+<parameter id="HomMat2D2"/>
+<parameter id="HomMat2D3"/>
+<parameter id="HomMat2D4"/>
+<parameter id="Pose"/>
+<parameter id="ROI"/>
+<parameter id="Slants"/>
+<parameter id="SplitedImages"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="CurByBRDFSmall0625">
+<interface>
+<io>
+<par name="AllImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="CurX" base_type="iconic" dimension="0"/>
+<par name="CurY" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="dlt" base_type="ctrl" dimension="0"/>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="CurByBRDFSmall0625">
+<parameters>
+<parameter id="AllImages"/>
+<parameter id="CurX"/>
+<parameter id="CurY"/>
+<parameter id="Pose"/>
+<parameter id="Slants"/>
+<parameter id="dlt"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="CurBySlope0625">
+<interface>
+<io>
+<par name="Sx" base_type="iconic" dimension="0"/>
+<par name="Sy" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="XCur" base_type="iconic" dimension="0"/>
+<par name="YCur" base_type="iconic" dimension="0"/>
+<par name="MeanCur" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Sigma" base_type="ctrl" dimension="0"/>
+<par name="dlt" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>convert_image_type (Sx, ColMean, 'real')</l>
+<l>convert_image_type (Sy, RowMean, 'real')</l>
+<l>* derivate_vector_field (Gradient, CurMean, 3, 'mean_curvature')</l>
+<l>* derivate_vector_field (Gradient, CurGauss, 3, 'gauss_curvature')</l>
+<c></c>
+<l>* real_to_vector_field (Sx, Sy, Gradient, 'vector_field_relative')</l>
+<c></c>
+<l>* vector_field_to_real (Gradient, RowImage_Cam1, ColImage_Cam1)</l>
+<l>* mean_image (Sy, RowMean, 3, 3)</l>
+<l>* mean_image (Sx, ColMean, 3, 3)</l>
+<c>* ***************</c>
+<l>* gen_empty_obj (Sy)</l>
+<l>* gen_empty_obj (Sx)</l>
+<c>* ***************</c>
+<l>* sobel_amp (ColMean, CurX, 'x', 3)</l>
+<l>* sobel_amp (RowMean, CurY, 'y', 3)</l>
+<l>* sobel_amp (ColMean, CXCY, 'y', 3)</l>
+<l>* sobel_amp (RowMean, CYCX, 'x', 3)</l>
+<l>* Sigma := 3</l>
+<l>derivate_gauss (ColMean, CurX, Sigma, 'x')</l>
+<l>derivate_gauss (RowMean, CurY, Sigma, 'y')</l>
+<c>* CT down**********************************************************************************</c>
+<l>* add_image (CurX, CurY, CurMean, 0.5, 0)</l>
+<c>* *********************************************************************************</c>
+<c>* scale_image_range</c>
+<c>* *********************************************************************************</c>
+<l>Deviation := 0.001</l>
+<l>Mean := 0</l>
+<l>* dlt := 10</l>
+<l>count_seconds (S1)</l>
+<l>scale_image_range (CurX, CurXScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<l>scale_image_range (CurY, CurYScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<c></c>
+<l>scale_image_max (CurXScaled, XCur)</l>
+<l>scale_image_max (CurYScaled, YCur)</l>
+<c></c>
+<l>add_image (XCur, YCur, MeanCur, 0.5, 0)</l>
+<c></c>
+<c>* *scale_image_range (CurMean, CurMeanScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</c>
+<c>* *scale_image_max (CurMeanScaled, MeanCur)</c>
+<l>return ()</l>
+<c></c>
+</body>
+<docu id="CurBySlope0625">
+<parameters>
+<parameter id="MeanCur"/>
+<parameter id="Sigma"/>
+<parameter id="Sx"/>
+<parameter id="Sy"/>
+<parameter id="XCur"/>
+<parameter id="YCur"/>
+<parameter id="dlt"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="MoveImage0701">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="ImageMoved" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="MoveRow" base_type="ctrl" dimension="0"/>
+<par name="MoveCo" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<c>* ***********************************************************************</c>
+<c>* ***********************************************************************</c>
+<l>hom_mat2d_identity (HomMat2DIdentity)</l>
+<l>hom_mat2d_translate_local (HomMat2DIdentity, MoveRow, MoveCo, HomMat2DTranslate)</l>
+<l>affine_trans_image (Image, ImageMoved, HomMat2DTranslate, 'constant', 'false')</l>
+<l>* dev_clear_window ()</l>
+<l>* dev_display (Image)</l>
+<l>* dev_display (ImageMoved)</l>
+<l>* add_image (Image, ImageMoved, ImageResult, 0.5, 0)</l>
+<l>* stop ()</l>
+<l>return ()</l>
+</body>
+<docu id="MoveImage0701">
+<parameters>
+<parameter id="Image"/>
+<parameter id="ImageMoved"/>
+<parameter id="MoveCo"/>
+<parameter id="MoveRow"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="LoadHalconConfigs">
+<interface>
+<oo>
+<par name="FFCMaps" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="HalconConfigsFold" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D1" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D2" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D3" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D4" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<l>read_tuple (HalconConfigsFold+'Slants', Slants)</l>
+<l>read_tuple (HalconConfigsFold+'Pose', Pose)</l>
+<c>* ****************</c>
+<l>open_file (HalconConfigsFold+'HomMat2D1.mat', 'input_binary', FileHandle)</l>
+<l>fread_serialized_item (FileHandle, SerializedItemHandle)</l>
+<l>deserialize_hom_mat2d (SerializedItemHandle, HomMat2D1)</l>
+<l>close_file (FileHandle)</l>
+<c></c>
+<l>open_file (HalconConfigsFold+'HomMat2D2.mat', 'input_binary', FileHandle)</l>
+<l>fread_serialized_item (FileHandle, SerializedItemHandle)</l>
+<l>deserialize_hom_mat2d (SerializedItemHandle, HomMat2D2)</l>
+<l>close_file (FileHandle)</l>
+<c></c>
+<l>open_file (HalconConfigsFold+'HomMat2D3.mat', 'input_binary', FileHandle)</l>
+<l>fread_serialized_item (FileHandle, SerializedItemHandle)</l>
+<l>deserialize_hom_mat2d (SerializedItemHandle, HomMat2D3)</l>
+<l>close_file (FileHandle)</l>
+<c></c>
+<l>open_file (HalconConfigsFold+'HomMat2D4.mat', 'input_binary', FileHandle)</l>
+<l>fread_serialized_item (FileHandle, SerializedItemHandle)</l>
+<l>deserialize_hom_mat2d (SerializedItemHandle, HomMat2D4)</l>
+<l>close_file (FileHandle)</l>
+<c>* *****</c>
+<l>read_object (AlbedoFFC, HalconConfigsFold+'AlbedoFFC4')</l>
+<l>* read_image (AlbedoFFC, HalconConfigsFold+'AlbedoFFC')</l>
+<l>read_object (DiffuseFFC, HalconConfigsFold+'DiffuseFFC4')</l>
+<l>read_object (RoughnessFFC, HalconConfigsFold+ 'RoughnessFFC4')</l>
+<l>read_image (ChFFC, HalconConfigsFold+ 'ChFFC')</l>
+<c></c>
+<l>concat_obj (AlbedoFFC, DiffuseFFC, ObjectsConcat2)</l>
+<l>concat_obj (ObjectsConcat2, RoughnessFFC, FFCMaps1)</l>
+<l>concat_obj (FFCMaps1, ChFFC, FFCMaps)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="LoadHalconConfigs">
+<parameters>
+<parameter id="FFCMaps"/>
+<parameter id="HalconConfigsFold"/>
+<parameter id="HomMat2D1"/>
+<parameter id="HomMat2D2"/>
+<parameter id="HomMat2D3"/>
+<parameter id="HomMat2D4"/>
+<parameter id="Pose"/>
+<parameter id="Slants"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GetDxDy0701">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Logo" base_type="iconic" dimension="0"/>
+</oo>
+<oc>
+<par name="LogoRow" base_type="ctrl" dimension="0"/>
+<par name="LogoColumn" base_type="ctrl" dimension="0"/>
+<par name="LogoAngle" base_type="ctrl" dimension="0"/>
+<par name="Row" base_type="ctrl" dimension="0"/>
+<par name="Column" base_type="ctrl" dimension="0"/>
+<par name="Angle" base_type="ctrl" dimension="0"/>
+<par name="Area" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c></c>
+<l>* dev_display (Image)</l>
+<l>get_image_size (Image, Width, Height)</l>
+<l>* binary_threshold (Image, Region, 'max_separability', 'light', UsedThreshold)</l>
+<l>threshold (Image, Regions, 70, 255)</l>
+<l>fill_up (Regions, RegionFillUp)</l>
+<l>closing_circle (RegionFillUp, RegionClosing, 25)</l>
+<l>opening_circle (RegionClosing, RegionOpening, 35)</l>
+<l>connection (RegionOpening, ConnectedRegions)</l>
+<l>select_shape_std (ConnectedRegions, PartRegion, 'max_area', 70)</l>
+<l>smallest_rectangle2 (PartRegion, Row, Column, Phi, Length1, Length2)</l>
+<l>gen_rectangle2 (PartRect2, Row, Column, Phi, Length1, Length2)</l>
+<l>Angle := deg(Phi)</l>
+<c>* ********************************************************************</c>
+<l>gen_rectangle2 (RegionErosion, Row, Column, Phi, Length1/3, Length2/3)</l>
+<l>reduce_domain (Image, RegionErosion, ImageReduced)</l>
+<l>* binary_threshold (ImageReduced, Region, 'max_separability', 'light', UsedThreshold)</l>
+<l>threshold (ImageReduced, Region1, 0, 90)</l>
+<l>fill_up (Region1, RegionFillUp1)</l>
+<l>opening_circle (RegionFillUp1, RegionOpening, 5)</l>
+<l>* fill_up (RegionOpening, RegionFillUp1)</l>
+<l>connection (RegionOpening, ConnectedRegions)</l>
+<l>select_shape_std (ConnectedRegions, Logo1, 'max_area', 70)</l>
+<l>difference (ConnectedRegions, Logo1, RegionDifference1)</l>
+<l>select_shape_std (RegionDifference1, Logo2, 'max_area', 70)</l>
+<l>union2 (Logo1, Logo2, Logo)</l>
+<l>union1 (Logo, Logo)</l>
+<l>area_center (Logo1, Area, LogoRow, LogoColumn)</l>
+<l>* smallest_rectangle1 (Logo1, Row11, Column11, Row2, Column2)</l>
+<l>* gen_rectangle1 (Rectangle1, Row11, Column2, Row2, Column2)</l>
+<c></c>
+<l>* smallest_rectangle2 (Logo1, Row1, Column1, Phi1, Length11, Length21)</l>
+<l>* gen_rectangle2 (Rectangle1, Row1- Length21/2, Column1+Length11, Phi1, Length11, Length21/2)</l>
+<l>* gen_rectangle2 (Rectangle2, Row1+ Length21/2, Column1+Length11, Phi1, Length11, Length21/2)</l>
+<l>* intersection (Rectangle1, Logo1, LogoRight1)</l>
+<l>* intersection (Rectangle2, Logo1, LogoRight2)</l>
+<c></c>
+<c>* *********************************************************</c>
+<l>* LogoAngle := deg(Phi1)</l>
+<l>* dev_display (Image)</l>
+<l>* dev_display (Logo)</l>
+<l>* dev_display (Rectangle)</l>
+<l>* stop ()</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="GetDxDy0701">
+<parameters>
+<parameter id="Angle"/>
+<parameter id="Area"/>
+<parameter id="Column"/>
+<parameter id="Image"/>
+<parameter id="Logo"/>
+<parameter id="LogoAngle"/>
+<parameter id="LogoColumn"/>
+<parameter id="LogoRow"/>
+<parameter id="Row"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="Pre2_0625">
+<interface>
+<io>
+<par name="SplitedImages" base_type="iconic" dimension="0"/>
+<par name="Pre1Out" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Pre2Out" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D2" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="Pre2_0625">
+<parameters>
+<parameter id="HomMat2D2"/>
+<parameter id="Pose"/>
+<parameter id="Pre1Out"/>
+<parameter id="Pre2Out"/>
+<parameter id="Slants"/>
+<parameter id="SplitedImages"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GetAlbedo3_0625">
+<interface>
+<io>
+<par name="AlliImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Diffuse3" base_type="iconic" dimension="0"/>
+<par name="Roughness3" base_type="iconic" dimension="0"/>
+</oo>
+</interface>
+<body>
+<l>* select_obj (SplitedImages, XF, 0*4+[1,2,3,4])</l>
+<l>* select_obj (SplitedImages, XB, 1*4+[1,3,4])</l>
+<l>* select_obj (SplitedImages, YF, 2*4+[1,2,3,4])</l>
+<l>* select_obj (SplitedImages, YB, 3*4+[1])</l>
+<c></c>
+<l>* select_obj (AlliImages, XF1, 1)</l>
+<l>* select_obj (AlliImages, XF2, 2)</l>
+<l>* select_obj (AlliImages, XF3, 3)</l>
+<l>* select_obj (AlliImages, XF4, 4)</l>
+<c>* Albedo/normal********************************</c>
+<l>* add_image (XF1, XF2, ImageResult1, 0.5, 0)</l>
+<l>* add_image (XF3, XF4, ImageResult2, 0.5, 0)</l>
+<l>* add_image (ImageResult2, ImageResult1, Albedo3, 0.5, 0)</l>
+<c>* Diffuse********************************</c>
+<l>* add_image (XF1, XF4, Diffuse3, 0.5, 0)</l>
+<c>* Specular********************************</c>
+<l>* max_image (XF2, XF3, ImageMax2)</l>
+<l>* min_image (XF1, XF4, ImageMin1)</l>
+<l>* sub_image (ImageMax2, ImageMin1, Specular, 1, 0)</l>
+<c></c>
+<c>* 0620********************************</c>
+<l>select_obj (AlliImages, YF1, 1)</l>
+<l>select_obj (AlliImages, YF2, 2)</l>
+<l>select_obj (AlliImages, YF3, 3)</l>
+<l>select_obj (AlliImages, YF4, 4)</l>
+<c>* Albedo/normal********************************</c>
+<l>* add_image (YF1, YF2, ImageResult1, 0.5, 0)</l>
+<l>* add_image (YF3, YF4, ImageResult2, 0.5, 0)</l>
+<l>* add_image (ImageResult2, ImageResult1, Albedo3, 0.5, 0)</l>
+<c>* Diffuse********************************</c>
+<l>add_image (YF1, YF4, Diffuse3, 0.5, 0)</l>
+<c>* SpecularY********************************</c>
+<l>add_image (YF2, YF3, YF23, 0.5, 0)</l>
+<l>* add_image (YF1, YF4, YF14, 0.5, 0)</l>
+<l>sub_image (YF23, Diffuse3, Roughness3, 1, 0)</l>
+<l>* stop ()</l>
+<c></c>
+<l>return ()</l>
+<c></c>
+</body>
+<docu id="GetAlbedo3_0625">
+<parameters>
+<parameter id="AlliImages"/>
+<parameter id="Diffuse3"/>
+<parameter id="Roughness3"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="AlliImgs4_0625">
+<interface>
+<io>
+<par name="InImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="YBMove" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Offset" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>select_obj (InImages, XF2S, [1,2])</l>
+<l>select_obj (InImages, YBS, 2+[1,2])</l>
+<c>* ***********************************************************************</c>
+<c>* rotate_image</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XF2S, XF2, 1)</l>
+<l>select_obj (YBS, YB2, 2)</l>
+<l>GetDxDy0701 (XF2, Logo1, LogoRow1, LogoColumn1, LogoAngle1, Row1, Column1, Angle1, Area)</l>
+<l>* GetDxDy0701 (YB2, Logo4, LogoRow4, LogoColumn4, LogoAngle4, Row4, Column4, Angle4, Area3)</l>
+<c>* ***********************************************************************</c>
+<l>rotate_image (YBS, YBSRotate, -Angle1, 'constant')</l>
+<c>* ***********************************************************************</c>
+<c>* CropImage</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (YBSRotate, YB2, 2)</l>
+<l>GetDxDy0701 (YB2, Logo4, LogoRow4, LogoColumn4, LogoAngle4, Row4, Column4, Angle4, Area7)</l>
+<l>OutImgWith := 14000</l>
+<l>OutImgHeight := 10000</l>
+<l>gen_rectangle2 (CropROI4, Row4, Column4, 0, OutImgWith/2-0.5, OutImgHeight/2-0.5)</l>
+<l>reduce_domain (YBSRotate, CropROI4, ImageReduced4)</l>
+<l>crop_domain (ImageReduced4, YBSPart)</l>
+<c>* ***********************************************************************</c>
+<c>* MoveImage</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XF2S, XF2, 2)</l>
+<l>select_obj (YBSPart, YB2, 2)</l>
+<l>GetDxDy0701 (XF2, Logo1, LogoRow1, LogoColumn1, LogoAngle1, Row1, Column1, Angle1, Area1)</l>
+<l>GetDxDy0701 (YB2, Logo4, LogoRow4, LogoColumn4, LogoAngle4, Row4, Column4, Angle4, Area4)</l>
+<c></c>
+<l>* RowDiff12 := LogoRow2-LogoRow1</l>
+<l>* ColDiff12 := LogoColumn2-LogoColumn1</l>
+<c></c>
+<l>* RowDiff13 := LogoRow3-LogoRow1</l>
+<l>* ColDiff13 := LogoColumn3-LogoColumn1</l>
+<c></c>
+<l>RowDiff14 := LogoRow4-LogoRow1</l>
+<l>ColDiff14 := LogoColumn4-LogoColumn1</l>
+<c></c>
+<l>* RowDiff34 := LogoRow4-LogoRow3</l>
+<l>* ColDiff34 := LogoColumn4-LogoColumn3</l>
+<l>* stop ()</l>
+<l>* Offset := 7</l>
+<c>* *****************************************************</c>
+<l>MoveImage0701 (YBSPart, YBMove, -RowDiff14+Offset, -ColDiff14)</l>
+<l>* dev_display (XF2)</l>
+<l>* select_obj (YBMove, YBMove2, 2)</l>
+<l>* add_image (XF2, YBMove2, ImageResult, 0.5, 0)</l>
+<l>* stop ()</l>
+<c></c>
+<l>return ()</l>
+<c></c>
+<c></c>
+</body>
+<docu id="AlliImgs4_0625">
+<parameters>
+<parameter id="InImages"/>
+<parameter id="Offset"/>
+<parameter id="YBMove"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="Pre1_0625">
+<interface>
+<io>
+<par name="SplitedImages" base_type="iconic" dimension="0"/>
+<par name="FFCMaps1" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Pre1Out" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D1" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="Pre1_0625">
+<parameters>
+<parameter id="FFCMaps1"/>
+<parameter id="HomMat2D1"/>
+<parameter id="Pose"/>
+<parameter id="Pre1Out"/>
+<parameter id="Slants"/>
+<parameter id="SplitedImages"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GetAlbedo1_0625">
+<interface>
+<io>
+<par name="AlliImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Albedo1" base_type="iconic" dimension="0"/>
+<par name="Diffuse1" base_type="iconic" dimension="0"/>
+<par name="Roughness1" base_type="iconic" dimension="0"/>
+</oo>
+</interface>
+<body>
+<l>* select_obj (SplitedImages, XF, 0*4+[1,2,3,4])</l>
+<l>* select_obj (SplitedImages, XB, 1*4+[1,3,4])</l>
+<l>* select_obj (SplitedImages, YF, 2*4+[1,2,3,4])</l>
+<l>* select_obj (SplitedImages, YB, 3*4+[1])</l>
+<c></c>
+<l>* select_obj (AlliImages, XF1, 1)</l>
+<l>* select_obj (AlliImages, XF2, 2)</l>
+<l>* select_obj (AlliImages, XF3, 3)</l>
+<l>* select_obj (AlliImages, XF4, 4)</l>
+<c>* Albedo/normal********************************</c>
+<l>* add_image (XF1, XF2, ImageResult1, 0.5, 0)</l>
+<l>* add_image (XF3, XF4, ImageResult2, 0.5, 0)</l>
+<l>* add_image (ImageResult2, ImageResult1, Albedo1, 0.5, 0)</l>
+<c>* Diffuse********************************</c>
+<l>* add_image (XF1, XF4, Diffuse, 0.5, 0)</l>
+<c>* Specular********************************</c>
+<l>* max_image (XF2, XF3, ImageMax2)</l>
+<l>* min_image (XF1, XF4, ImageMin1)</l>
+<l>* sub_image (ImageMax2, ImageMin1, Specular, 1, 0)</l>
+<c></c>
+<c>* 0620********************************</c>
+<l>select_obj (AlliImages, XF1, 1)</l>
+<l>select_obj (AlliImages, XF2, 2)</l>
+<l>select_obj (AlliImages, XF3, 3)</l>
+<l>select_obj (AlliImages, XF4, 4)</l>
+<l>* select_obj (AlliImages, XB1, 5)</l>
+<l>* select_obj (AlliImages, XBText, 6)</l>
+<l>* select_obj (AlliImages, Dust0, 7)</l>
+<l>* select_obj (AlliImages, YF1, 8)</l>
+<l>* select_obj (AlliImages, YF2, 9)</l>
+<l>* select_obj (AlliImages, YF3, 10)</l>
+<l>* select_obj (AlliImages, YF4, 11)</l>
+<l>* select_obj (AlliImages, YB1, 12)</l>
+<c>* Albedo/normal********************************</c>
+<l>add_image (XF1, XF2, ImageResult1, 0.5, 0)</l>
+<l>add_image (XF3, XF4, ImageResult2, 0.5, 0)</l>
+<l>add_image (ImageResult2, ImageResult1, Albedo1, 0.5, 0)</l>
+<c>* Diffuse********************************</c>
+<l>add_image (XF1, XF4, Diffuse1, 0.5, 0)</l>
+<l>* add_image (YF1, YF4, DiffuseY, 0.5, 0)</l>
+<l>* add_image (DiffuseX, DiffuseY, Diffuse, 0.5, 0)</l>
+<c>* SpecularX********************************</c>
+<l>add_image (XF2, XF3, XF23, 0.5, 0)</l>
+<l>* add_image (XF1, XF4, XF14, 0.5, 0)</l>
+<l>sub_image (XF23, Diffuse1, Roughness1, 1, 0)</l>
+<c>* SpecularY********************************</c>
+<c></c>
+<l>* stop ()</l>
+<c></c>
+<l>return ()</l>
+<c></c>
+</body>
+<docu id="GetAlbedo1_0625">
+<parameters>
+<parameter id="Albedo1"/>
+<parameter id="AlliImages"/>
+<parameter id="Diffuse1"/>
+<parameter id="Roughness1"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GetDiscolor1_0625">
+<interface>
+<io>
+<par name="GraysIn" base_type="iconic" dimension="0"/>
+<par name="FFCMaps" base_type="iconic" dimension="0"/>
+<par name="ROI" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Discolors" base_type="iconic" dimension="0"/>
+</oo>
+</interface>
+<body>
+<l>erosion_circle (ROI, ROI1, 115)</l>
+<l>MaenS := 20</l>
+<l>* mean_image (FFCMaps, FFCMapsMean, MaenS, MaenS)</l>
+<l>mean_image (GraysIn, GraysInMean, MaenS, MaenS)</l>
+<c>* **********************************************</c>
+<c>* **********************************************</c>
+<l>zoom_image_factor (FFCMaps, FFCMapsZ, 0.25, 0.25, 'bilinear')</l>
+<l>zoom_image_factor (GraysInMean, GraysInZ, 0.25, 0.25, 'bilinear')</l>
+<l>zoom_region (ROI1, RegionZoom, 0.25, 0.25)</l>
+<c>* **********************************************</c>
+<l>convert_image_type (FFCMapsZ, FFCMapsZ, 'real')</l>
+<l>convert_image_type (GraysInZ, GraysInZ, 'real')</l>
+<c>* **********************************************</c>
+<l>select_obj (FFCMapsZ, AlbedoFFC, 1)</l>
+<l>select_obj (FFCMapsZ, DiffuseFFC, 2)</l>
+<l>select_obj (FFCMapsZ, SpecularFFC, 3)</l>
+<c></c>
+<l>select_obj (GraysInZ, Albedo, 1)</l>
+<l>select_obj (GraysInZ, Diffuse, 2)</l>
+<l>select_obj (GraysInZ, Specular, 3)</l>
+<c>* **********************************************</c>
+<l>intensity (RegionZoom, AlbedoFFC, Mean1, Deviation1)</l>
+<l>intensity (RegionZoom, DiffuseFFC, Mean2, Deviation2)</l>
+<l>intensity (RegionZoom, SpecularFFC, Mean3, Deviation3)</l>
+<c></c>
+<l>div_image (Albedo, AlbedoFFC, Albedo1, Mean1, 0)</l>
+<l>div_image (Diffuse, DiffuseFFC, Diffuse1, Mean2, 0)</l>
+<l>div_image (Specular, SpecularFFC, Specular1, Mean3, 0)</l>
+<c>* **********************************************</c>
+<l>dlt := 1</l>
+<l>intensity (RegionZoom, Albedo1, Mean, Deviation)</l>
+<l>Deviation := 25</l>
+<l>scale_image_range (Albedo1, AlbedoScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<l>scale_image_max (AlbedoScaled, Albedo4)</l>
+<c></c>
+<l>intensity (RegionZoom, Diffuse1, Mean, Deviation)</l>
+<l>Deviation := 25</l>
+<l>scale_image_range (Diffuse1, DiffuseScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<l>scale_image_max (DiffuseScaled, Diffuse4)</l>
+<c></c>
+<l>intensity (RegionZoom, Specular1, Mean, Deviation)</l>
+<l>Deviation := 25</l>
+<l>scale_image_range (Specular1, SpecularScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<l>scale_image_max (SpecularScaled, Specular4)</l>
+<c></c>
+<c>* **********</c>
+<l>sub_image (Specular4, Diffuse4, Discolor1, 1, 100)</l>
+<c></c>
+<c></c>
+<c>* *out gray</c>
+<l>concat_obj (Albedo4, Diffuse4, ObjectsConcat)</l>
+<l>concat_obj (ObjectsConcat, Specular4, ObjectsConcat1)</l>
+<l>concat_obj (ObjectsConcat1, Discolor1, Discolors)</l>
+<c></c>
+<l>* dev_display (AlbedoZoomed)</l>
+<l>* dev_display (DiffuseZoomed)</l>
+<l>* dev_display (SpecZoomed)</l>
+<l>* dev_display (ChZoomed)</l>
+<l>* dev_display (Discolor1Zoomed)</l>
+<l>* dev_display (Discolor2Zoomed)</l>
+<l>* stop ()</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="GetDiscolor1_0625">
+<parameters>
+<parameter id="Discolors"/>
+<parameter id="FFCMaps"/>
+<parameter id="GraysIn"/>
+<parameter id="ROI"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="AlliImgs1_0625">
+<interface>
+<io>
+<par name="InImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="OutImages" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Offset" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>select_obj (InImages, XFS, [1,2,3,4])</l>
+<c>* ***********************************************************************</c>
+<c>* rotate_image</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XFS, XF1, 2)</l>
+<l>GetDxDy0701 (XF1, Logo1, LogoRow1, LogoColumn1, LogoAngle1, Row1, Column1, Angle1, Area)</l>
+<c>* ***********************************************************************</c>
+<l>rotate_image (XFS, XFSRotate, -Angle1, 'constant')</l>
+<c>* ***********************************************************************</c>
+<c>* CropImage</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XFSRotate, XF1, 2)</l>
+<l>GetDxDy0701 (XF1, Logo1, LogoRow1, LogoColumn1, LogoAngle1, Row1, Column1, Angle1, Area4)</l>
+<l>OutImgWith := 14000</l>
+<l>OutImgHeight := 10000</l>
+<l>gen_rectangle2 (CropROI1, Row1, Column1, 0, OutImgWith/2-0.5, OutImgHeight/2-0.5)</l>
+<c></c>
+<l>reduce_domain (XFSRotate, CropROI1, ImageReduced1)</l>
+<c></c>
+<l>crop_domain (ImageReduced1, OutImages)</l>
+<c>* **********************************************************************</c>
+<c>* OUT</c>
+<c>* **********************************************************************</c>
+<c></c>
+<l>return ()</l>
+<c></c>
+<c></c>
+</body>
+<docu id="AlliImgs1_0625">
+<parameters>
+<parameter id="InImages"/>
+<parameter id="Offset"/>
+<parameter id="OutImages"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="CurByBRDFSmall1_0625">
+<interface>
+<io>
+<par name="AllImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="CurY" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="dlt" base_type="ctrl" dimension="0"/>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>0IxtDAvmIjq1W2WaUszvxPxGMv4G0XFyVNKO+GyfJ5pj6oJwewdbSfUrdiDfDZS9fbC+r0TLQG6MMCPAHyWZKp0Ryiagmr3i5NHcLG1cNYoKD0wexW+tt2qnHNPYxvd7KtgDpZ/vOtgdqByyr9b/Ky4Gimq/2m1RN0g4xkDoykyWvgilkpBeW4TjNesnA4vMqPgLge2FE/bZpghZa71XVusXEp6Mp/x0ZgBw0HEjbB2NK3xmgab8OEmQocgB8g7UVIm0sKlYeoyZ88hszUcqBUl6viF/yMZZB0eMJ7fEs0uo5t9uWGBiZvTdoF9ptSWlJEQWeKPTJP3X8yXXmznPPsp97E4rRbnycAWd0e9UvpK0H5z/izsbRkMmTwmy5OB2LSi0Mz79hGKwDxcvNwSZEjp8YTquNGwHt7t0S+ZnBIU+IPeozBppPO9PWUogXc0nw9dHedvDmsQHed16F+5NGCV+kH34asOcJRIIZpMu0Lk6BmSbx2SIbUCQ4Q8JuTOyVKZUQuT03OMCSDMSCM0Mgy7RmON2WRTNf86rVVrXRF7RNb8utaLyOvEh4zoWYyI/HZ7QWoAW5w02YSWc/F80iIwzwX06yH9RrMiQAtVnH6wdIuS+NvwKxKF+8BZXYU4YApLsD39aTnDlIo5ApWf59ihKdwO7YtUJmd2BbIoIrw8p8U3EE9noD7/S923BPZAbGF1p54eanlTvDzi4DMsWte0cq4YuTm1TRBeQifkgTphzmz/yXIo5FUIw/mSz9QC3qA0+bNYRR4NabNo3MpaeWECOfAqv3THzsTzI7auAiO3qpC/3orxcY6TpD6Haw0clx9cbSPjjyzXupM7Vusb6GaCqXrwiV1KUKBKen0qIGnouTsHQJq38+HbuhJ3jN/AWrog2NpeNJ+DDaGomragJVO3mMLFwK8GTe9R+kawdRzPQUrWa0spNBia17IZpKZMRyZ8pX6IrOUXB1aBGdDobKIkvn9VA6xJJT2WWTH/tHEidCYuntbdlBHD6oQNaHzlsIFIQYnldRKLYVc8xDcEWkTAJ9tGiCF6TYONtYIYb5xQmVOmsT6NrCoWMPda8d9xA8o+UZmFmqgaIdCnvjTi0tWtbv/7hieGOHGTutdhh4f13VTQW1BPB7uQ0UaCNJWcnknLPgJf2Qk/v52nrFcBvfjM222AHrWCXKRqYdflZqlEo5wmaBc2pVTojY+a61K7kP+pRS5raQbLQ949KCq9HDwN6gtQD+g3KLdhEcxMeWC8VTWv0upByLCSllTVAWIMu85v8ZMhaWDP2HBJyU/cbaQ</xb>
+<docu id="CurByBRDFSmall1_0625">
+<parameters>
+<parameter id="AllImages"/>
+<parameter id="CurY"/>
+<parameter id="Pose"/>
+<parameter id="Slants"/>
+<parameter id="dlt"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="AlliImgs2_0625">
+<interface>
+<io>
+<par name="InImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="XBSAlli" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Offset" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>select_obj (InImages, XF2S, [1,2])</l>
+<l>select_obj (InImages, XBS, 2+[1,2,3,4])</l>
+<c></c>
+<c>* ***********************************************************************</c>
+<c>* rotate_image</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XF2S, XF2, 1)</l>
+<l>select_obj (XBS, XB2, 2)</l>
+<c></c>
+<l>GetDxDy0701 (XF2, Logo1, LogoRow1, LogoColumn1, LogoAngle1, Row1, Column1, Angle1, Area)</l>
+<l>GetDxDy0701 (XB2, Logo2, LogoRow2, LogoColumn2, LogoAngle2, Row2, Column2, Angle2, Area1)</l>
+<c>* ***********************************************************************</c>
+<l>rotate_image (XBS, XBSRotate, -Angle1, 'constant')</l>
+<c>* ***********************************************************************</c>
+<c>* CropImage</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XBSRotate, XB2, 2)</l>
+<l>GetDxDy0701 (XB2, Logo2, LogoRow2, LogoColumn2, LogoAngle2, Row2, Column2, Angle2, Area5)</l>
+<l>OutImgWith := 14000</l>
+<l>OutImgHeight := 10000</l>
+<l>gen_rectangle2 (CropROI2, Row2, Column2, 0, OutImgWith/2-0.5, OutImgHeight/2-0.5)</l>
+<l>reduce_domain (XBSRotate, CropROI2, ImageReduced2)</l>
+<l>crop_domain (ImageReduced2, XBSPart)</l>
+<c>* ***********************************************************************</c>
+<c>* MoveImage</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XF2S, XF2, 2)</l>
+<l>select_obj (XBSPart, XB2, 2)</l>
+<l>GetDxDy0701 (XF2, Logo1, LogoRow1, LogoColumn1, LogoAngle1, Row1, Column1, Angle1, Area8)</l>
+<l>GetDxDy0701 (XB2, Logo2, LogoRow2, LogoColumn2, LogoAngle2, Row2, Column2, Angle2, Area9)</l>
+<l>RowDiff12 := LogoRow2-LogoRow1</l>
+<l>ColDiff12 := LogoColumn2-LogoColumn1</l>
+<l>* stop ()</l>
+<l>* Offset := 7</l>
+<c>* *****************************************************</c>
+<l>MoveImage0701 (XBSPart, XBSAlli, -RowDiff12+Offset, -ColDiff12)</l>
+<l>* concat_obj (XF2, XBSAlli, XS)</l>
+<l>* dev_display (XF2)</l>
+<l>* select_obj (XBSAlli, XBSMove2, 2)</l>
+<l>* add_image (XF2, XBSMove2, ImageResult, 0.5, 0)</l>
+<l>* stop ()</l>
+<c></c>
+<c>* **********************************************************************</c>
+<c>* OUT</c>
+<c>* **********************************************************************</c>
+<l>* concat_obj (XS, YSMove, OutImages)</l>
+<l>* concat_obj (OutImages1, DustPart, OutImages)</l>
+<l>return ()</l>
+<c></c>
+<c></c>
+</body>
+<docu id="AlliImgs2_0625">
+<parameters>
+<parameter id="InImages"/>
+<parameter id="Offset"/>
+<parameter id="XBSAlli"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="Pre3_0625">
+<interface>
+<io>
+<par name="SplitedImages" base_type="iconic" dimension="0"/>
+<par name="Pre1Out" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Pre3Out" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D3" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="Pre3_0625">
+<parameters>
+<parameter id="HomMat2D3"/>
+<parameter id="Pose"/>
+<parameter id="Pre1Out"/>
+<parameter id="Pre3Out"/>
+<parameter id="Slants"/>
+<parameter id="SplitedImages"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="AlliImgs3_0625">
+<interface>
+<io>
+<par name="InImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="YFMove" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Offset" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>select_obj (InImages, XF2S, [1,2])</l>
+<l>select_obj (InImages, YFS, 2+[1,2,3,4])</l>
+<c>* ***********************************************************************</c>
+<c>* rotate_image</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XF2S, XF2, 1)</l>
+<l>select_obj (YFS, YF2, 2)</l>
+<l>GetDxDy0701 (XF2, Logo1, LogoRow1, LogoColumn1, LogoAngle1, Row1, Column1, Angle1, Area)</l>
+<l>* GetDxDy0701 (YF1, Logo3, LogoRow3, LogoColumn3, LogoAngle3, Row3, Column3, Angle3, Area2)</l>
+<c>* ***********************************************************************</c>
+<l>rotate_image (YFS, YFSRotate, -Angle1, 'constant')</l>
+<c>* ***********************************************************************</c>
+<c>* CropImage</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (YFSRotate, YF2, 2)</l>
+<l>GetDxDy0701 (YF2, Logo3, LogoRow3, LogoColumn3, LogoAngle3, Row3, Column3, Angle3, Area6)</l>
+<l>OutImgWith := 14000</l>
+<l>OutImgHeight := 10000</l>
+<l>gen_rectangle2 (CropROI3, Row3, Column3, 0, OutImgWith/2-0.5, OutImgHeight/2-0.5)</l>
+<l>reduce_domain (YFSRotate, CropROI3, ImageReduced3)</l>
+<l>crop_domain (ImageReduced3, YFSPart)</l>
+<c>* ***********************************************************************</c>
+<c>* MoveImage</c>
+<c>* ***********************************************************************</c>
+<l>select_obj (XF2S, XF2, 2)</l>
+<l>select_obj (YFSPart, YF2, 2)</l>
+<l>GetDxDy0701 (XF2, Logo1, LogoRow1, LogoColumn1, LogoAngle1, Row1, Column1, Angle1, Area8)</l>
+<l>GetDxDy0701 (YF2, Logo3, LogoRow3, LogoColumn3, LogoAngle3, Row3, Column3, Angle3, Area10)</l>
+<c></c>
+<l>RowDiff13 := LogoRow3-LogoRow1</l>
+<l>ColDiff13 := LogoColumn3-LogoColumn1</l>
+<l>* Offset := 0</l>
+<c>* *****************************************************</c>
+<l>MoveImage0701 (YFSPart, YFMove, -RowDiff13+Offset, -ColDiff13-Offset)</l>
+<l>* dev_display (XF2)</l>
+<l>* select_obj (YFMove, YSMove2, 2)</l>
+<l>* add_image (XF2, YSMove2, ImageResult, 0.5, 0)</l>
+<l>* stop ()</l>
+<l>return ()</l>
+<c></c>
+<c></c>
+</body>
+<docu id="AlliImgs3_0625">
+<parameters>
+<parameter id="InImages"/>
+<parameter id="Offset"/>
+<parameter id="YFMove"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="PSbyBRDFBig2_0625">
+<interface>
+<io>
+<par name="AllImages" base_type="iconic" dimension="0"/>
+<par name="ROI" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="SlopeY" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="PSbyBRDFBig2_0625">
+<parameters>
+<parameter id="AllImages"/>
+<parameter id="Pose"/>
+<parameter id="ROI"/>
+<parameter id="Slants"/>
+<parameter id="SlopeY"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="CurBySlope2_0625">
+<interface>
+<io>
+<par name="Sy" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="YCur" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Sigma" base_type="ctrl" dimension="0"/>
+<par name="dlt" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>convert_image_type (Sy, RowMean, 'real')</l>
+<l>* derivate_vector_field (Gradient, CurMean, 3, 'mean_curvature')</l>
+<l>* derivate_vector_field (Gradient, CurGauss, 3, 'gauss_curvature')</l>
+<c></c>
+<l>* real_to_vector_field (Sx, Sy, Gradient, 'vector_field_relative')</l>
+<c></c>
+<l>* vector_field_to_real (Gradient, RowImage_Cam1, ColImage_Cam1)</l>
+<l>* mean_image (Sy, RowMean, 3, 3)</l>
+<l>* mean_image (Sx, ColMean, 3, 3)</l>
+<c>* ***************</c>
+<l>* gen_empty_obj (Sy)</l>
+<l>* gen_empty_obj (Sx)</l>
+<c>* ***************</c>
+<l>* sobel_amp (ColMean, CurX, 'x', 3)</l>
+<l>* sobel_amp (RowMean, CurY, 'y', 3)</l>
+<l>* sobel_amp (ColMean, CXCY, 'y', 3)</l>
+<l>* sobel_amp (RowMean, CYCX, 'x', 3)</l>
+<l>* Sigma := 3</l>
+<l>derivate_gauss (RowMean, CurY, Sigma, 'y')</l>
+<c>* CT down**********************************************************************************</c>
+<l>* add_image (CurX, CurY, CurMean, 0.5, 0)</l>
+<c>* *********************************************************************************</c>
+<c>* scale_image_range</c>
+<c>* *********************************************************************************</c>
+<l>Deviation := 0.001</l>
+<l>Mean := 0</l>
+<l>dlt := 10</l>
+<l>count_seconds (S1)</l>
+<l>scale_image_range (CurY, CurYScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<c></c>
+<l>scale_image_max (CurYScaled, YCur)</l>
+<c></c>
+<c></c>
+<c></c>
+<c>* *scale_image_range (CurMean, CurMeanScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</c>
+<c>* *scale_image_max (CurMeanScaled, MeanCur)</c>
+<l>return ()</l>
+<c></c>
+</body>
+<docu id="CurBySlope2_0625">
+<parameters>
+<parameter id="Sigma"/>
+<parameter id="Sy"/>
+<parameter id="YCur"/>
+<parameter id="dlt"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="Pre4_0625">
+<interface>
+<io>
+<par name="SplitedImages" base_type="iconic" dimension="0"/>
+<par name="Pre1Out" base_type="iconic" dimension="0"/>
+<par name="Pre2Out" base_type="iconic" dimension="0"/>
+<par name="Pre3Out" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Pre4Out" base_type="iconic" dimension="0"/>
+<par name="GrayImages" base_type="iconic" dimension="0"/>
+<par name="CurImages" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+<par name="HomMat2D4" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="Pre4_0625">
+<parameters>
+<parameter id="CurImages"/>
+<parameter id="GrayImages"/>
+<parameter id="HomMat2D4"/>
+<parameter id="Pose"/>
+<parameter id="Pre1Out"/>
+<parameter id="Pre2Out"/>
+<parameter id="Pre3Out"/>
+<parameter id="Pre4Out"/>
+<parameter id="Slants"/>
+<parameter id="SplitedImages"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="CurByBRDFSmall3_0625">
+<interface>
+<io>
+<par name="AllImages" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="CurX" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="dlt" base_type="ctrl" dimension="0"/>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>CLhJbor6LJPHK9q5/OgJHk+O2Sw7mNmbIIomHqLAg5HCy8NlMIq1lpIIxTJRlP8ynq/4ddegeTBWHf2Cz87OhXZZb+ooFUh6PtQgRzf8uaIRwBprISE+l3RifL4CfymWu9RZKzqqyrdYmKY0epHbX+HF9OPHoqfkS/NDmWrtITo9F3gvfhizMmameht5aDNEZ2jB710hE+BjlUlh2tGhytLlRUt0yNyQCtyG+kjj+fqhrxF/Y4KBxeBEZBuQQ9vyS1encGHqvUykxwEqLi7MNVk654XBlyoRPiEamPk1rksOMlacQH+ph22fvLMmSYPx5yAZei1HQiLLNT3VlkhabE+yEi6nmseYbGugAdxlP6Ef7xSPEiEDJHx/fi1/iImHAN2h5F/kk+vcBuqCyrTSpxOKVNOU2fXfS+dvsGwNEuNrXYj0pyteAqZCqcm1J89y5LFeylMTjJdmbbnmcTDAfs/2x7t8nGL0Sf9vSRHiaItepvPU+3Bc/bxQu6Y18GzUa9CHBxyO04hhXaLSO15VhGPJ1eqSTd4eln75IxP2WPSE4r3Hibp1zMMAoM+2K8gUG+Z+a2unFQr0dNYlL1cgvADhSEdLK29nhih5k8aLpDPI9MJ2MXAbOqVlZEurqpnJ9l4JVZ7yOLZ6ts5PMoW+sVNhS5oD2g2mESXGrug3aqCArziMHaXEp1eklkSnn6pI2gkYLe91Z4JTgLvN008RI+X0AVF59tePRVywMgMNJ94gBvvUtQibSjsu5n+kp5AvCaaKOICxXuwYJTWG9i+5RRLl/do8DV5Gt1kwopcIAR/IC2D98na1QBhjqYI4GW/tbzKw2+ENASlC0joc6CKWKPUBuWUY9FJ0NwtJu7nDXVAMjdVnVob1oXrd9fJqQp8kDtPQuYVzcLxER/lZDnA7gUxaD6lTVAa2HS5rjvZ5zxpPRg+36PE5lxualMVwSfvOp2TeWSsnbLvJ8GrMDG3nmbPdGhNEMGKXlNK/xeK/sfDUcZJjM2QYRv7BUSh5fL7/tecVxwvDi13gyLVTYa+QkSIOoap8T1GWdJhfJ9J/fmhMyfgEoYe/S+qIX9G5z7ddg+5nXpOIm0HCLF9F1lU/POTVEUx1SblW8YHadmm2cKaCCEns+oxVQ4d+CObVPx+vf/9anSWCZp4pYJQTgAyska1RZOzbyzK/L/dcFzHa4UkQrqLnAXhdZhtPzlbo8Zh10WyxEJquF6ydP2wBQA9P2spNDD7b5CXM6x3BhSalJju+bJztHvynqxCT4yuc/fQahKrWOons5c8MaxBCNvepQPv0I2WlHPlZUBxJBOPD1C5Q0/Sm5IFeZVMySuh+A9Iw/UUQzGTeOjd2dvPEpR5aVtTaAaiU1tpQ0Z92C2r1CjuitLZuRHtehBgdWGrIIFqzpkR3JfmoxYm2nm+fVuWvYV+m7dvr6U4j/sLx4iyNoMzBabRZPlVpbT9+sKdrsQyX1koAKAHwxlWcxvWq2PIyoq2YpXhcybaWa1G/8zaxzMA/7bfzfZ7et50DYJ9rOScjU5/2oOHxy+bkwRfXt2Rol3vdVxn8gz1+5zHgNz7XVrgAo8t5wQn8CQ6hSk76cg63YF+gyqe8YGW8dEGUQq/alr7eRP7CVusx</xb>
+<docu id="CurByBRDFSmall3_0625">
+<parameters>
+<parameter id="AllImages"/>
+<parameter id="CurX"/>
+<parameter id="Pose"/>
+<parameter id="Slants"/>
+<parameter id="dlt"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="PSbyBRDFBig4_0625">
+<interface>
+<io>
+<par name="AllImages" base_type="iconic" dimension="0"/>
+<par name="ROI" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="SlopeX" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+<par name="Pose" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>8FHwtOh4guiTI6Hl6lkpX75VhRId+aTeToQDLTJWyEYLPocf/V1hkP7rI1dhbR1LQWT4aPLm+pIHEDuXXj1ytVTrDbV1h496SkXxps+qxRojVP5dK2b3/r0wIYGcPSOeWVvGfg3Wn/LFkzmYUGmiLpWGyN2fe5XfqOPJaIqTk6gSX4U5+dDllbLx9Zq1GQvTKMBhoF3q4l89bC4/CeTSkqUitxstA/Ms5PsmEdIdBbFcPNPJNNWA5WaLTdR+TtNMMRSoxRcJTH+vCBZfmqfEA4JH6+2nPuu0H9v011ksoMGqb2lt6UIQLXj7tdBolPsCGLZQWoGB4xZQNNr4agXPx/1esSYOzEwcgBMQme0/MCX58Dlat1rUMwQuynd/v9r7IVWQY7cN9VILQVq7X0pNeOyQm6LdQ5eq6S3Qc22SL+JkRPBFojCNb/XKBXTwU7DdeJqZfrIxTtYhKqf7byBWvmTSKF1Bwpy+UFOg6exPwwYyDNbmmoDDSuvjb/lRf/AAOb/oPY5U7EeKOzQ7YypmxkB+7svYeG7n2a6xoEZQExERDthy0TsOsY7P+r3qiWiKrQlfSyP2VsrcZfKrDXExHOEGjNy3j6POfikXky7YRX4M2I+dYbioAPaXFl8AEDshKwiny1Q5CiwTw2qkk8bJLaLPRWIrwq2Ks5Hr0Aif5R4NEqdJ2cYYYGHSrc78u0VU2gULASGeKNyZ7G0eM4SCzXDn7WDEmAFQqAxP9V9JLN6n9RWb+vW8YRVrh197q5pZQma0F+wapgb1JbBVllBlsSD8LqZmI8xTPPQGtI77Ii38ENtcSsNyJg16gpZ1dlaIw5nsdF333rPGTS9cD0n3/KMd4hJB7uimwrWIx9GNYD4Vlf3wXqzBWRA7GNmEQvBFLt4o/rq1xwWCWKtt4gLcvhcLWp9mBJF3lPLxJSJOaROFtkT8XjUfYkkpbtpCuCxcK+vNB75V/fsfy/s60GM9s2ZTxXp1rhh00WhWWVAJHgk1R8u7vxkmky17lpcICV5QPKqeEawHgyHFZzNr1KBi/rYlJQ+miri1CS6lnxpKtljouPOv5f4hHWhBwZKQTU0QqphxgKSMRgNByOAdZ/bj7BGr0NFsOPda7soKksWjkg4UvZ5xJ77ugMbN0dydWWOGj7J1JY1T2ova6mDg5Aza0jAjfWbtyfXdHAPOGGSu0Cw64Ye2RlB+EC1ijjxVFiImzbZS/Ipv5P+oHZgtTWu+ov0r6YFWS+xfjBONcdc9yPny0q9/W4FuZWlC4mCnJDF+L86cTqKJHCzRpVPUGPdCa4xvEPLXhU22cQCXzyzH/FGwaTN/4YAzAwT4es2Fva0fkAz39agBA5m9Pgr3uSQrcpPv43vpY/QvXht6j291xy7H2Dg3cI56co79346XTLa2ALu+v7sMESJkiY4Azr8iDVEfrkJzYwKnbVlFLwXK1YRKC0d/GwjY4I84OtiCWks790Ibjmi+V8/kdRxuGcvMQV/aKJX6nWKEisAVvOgzKjvWGeBNdVn6VQcoWcPA/aOx7Fye3IXJCHiJnB24fxwSzceAu/QhopppoEy+nc/M3t3oaCaAqriKP08/PTWHMF4qpmINys/KfLDgKsZ/Kob22aFpg3e2w5Cbk8A0QFqJKzN/IaQyx8BJxFxZXmf7wGiLcM38TadtcQvpSDLHs3QJX2jHxJAjeuzQn8WOFteeQpFWa3VjDQ4WaVqvkrk0keJSUD+jBdfxb5KOZQlKI6gEneZ5eaj6JmVP+SY5cfENlqXKVO3kTcfL3WccdiYKt161gJTcQEnnci604q2KU1+28w</xb>
+<docu id="PSbyBRDFBig4_0625">
+<parameters>
+<parameter id="AllImages"/>
+<parameter id="Pose"/>
+<parameter id="ROI"/>
+<parameter id="Slants"/>
+<parameter id="SlopeX"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="CurBySlope4_0625">
+<interface>
+<io>
+<par name="Sx" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="XCur" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Sigma" base_type="ctrl" dimension="0"/>
+<par name="dlt" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>convert_image_type (Sx, RowMean, 'real')</l>
+<l>* derivate_vector_field (Gradient, CurMean, 3, 'mean_curvature')</l>
+<l>* derivate_vector_field (Gradient, CurGauss, 3, 'gauss_curvature')</l>
+<c></c>
+<l>* real_to_vector_field (Sx, Sx, Gradient, 'vector_field_relative')</l>
+<c></c>
+<l>* vector_field_to_real (Gradient, RowImage_Cam1, ColImage_Cam1)</l>
+<l>* mean_image (Sx, RowMean, 3, 3)</l>
+<l>* mean_image (Sx, ColMean, 3, 3)</l>
+<c>* ***************</c>
+<l>* gen_empty_obj (Sx)</l>
+<l>* gen_empty_obj (Sx)</l>
+<c>* ***************</c>
+<l>* sobel_amp (ColMean, CurX, 'x', 3)</l>
+<l>* sobel_amp (RowMean, CurY, 'y', 3)</l>
+<l>* sobel_amp (ColMean, CXCY, 'y', 3)</l>
+<l>* sobel_amp (RowMean, CYCX, 'x', 3)</l>
+<l>* Sigma := 3</l>
+<l>derivate_gauss (RowMean, CurX, Sigma, 'x')</l>
+<c>* CT down**********************************************************************************</c>
+<l>* add_image (CurX, CurY, CurMean, 0.5, 0)</l>
+<c>* *********************************************************************************</c>
+<c>* scale_image_range</c>
+<c>* *********************************************************************************</c>
+<l>Deviation := 0.001</l>
+<l>Mean := 0</l>
+<l>dlt := 10</l>
+<l>count_seconds (S1)</l>
+<l>scale_image_range (CurX, CurXScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</l>
+<c></c>
+<l>scale_image_max (CurXScaled, XCur)</l>
+<c></c>
+<c></c>
+<c></c>
+<c>* *scale_image_range (CurMean, CurMeanScaled, Mean-Deviation*dlt, Mean+Deviation*dlt)</c>
+<c>* *scale_image_max (CurMeanScaled, MeanCur)</c>
+<l>return ()</l>
+<c></c>
+</body>
+<docu id="CurBySlope4_0625">
+<parameters>
+<parameter id="Sigma"/>
+<parameter id="Sx"/>
+<parameter id="XCur"/>
+<parameter id="dlt"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="LinePSbyBRDF_0701">
+<interface>
+<io>
+<par name="Images" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Albedo" base_type="iconic" dimension="0"/>
+<par name="Sy" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Slants" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c>*get LightDirection from halcon angle</c>
+<l>tuple_length (Slants, M_Row)</l>
+<l>create_matrix (M_Row, 2, 0, LightDirectionMatrixID)</l>
+<l>tuple_gen_const (M_Row, 0, GeneralSlants)</l>
+<l>GeneralSlants := rad(Slants)</l>
+<l>tuple_gen_const (M_Row, 0, GeneralTilts)</l>
+<l>tuple_gen_const (M_Row, 0, Lx)</l>
+<l>Ly := sin(GeneralSlants)</l>
+<l>Lz := cos(GeneralSlants)</l>
+<c>*</c>
+<l>transpose_matrix_mod (LightDirectionMatrixID)</l>
+<l>FullValues:=[Ly,Lz]</l>
+<l>set_full_matrix (LightDirectionMatrixID, FullValues)</l>
+<l>transpose_matrix_mod (LightDirectionMatrixID)</l>
+<l>get_full_matrix (LightDirectionMatrixID, MatrixValues)</l>
+<l>get_size_matrix (LightDirectionMatrixID, MatrixRow, MatrixCol)</l>
+<c>*************************************************************************************   </c>
+<c>    </c>
+<c>*************************************************************************************</c>
+<c>    ***create matrix of image gray vaule</c>
+<l>    get_image_size (Images, Width, Height)</l>
+<l>    NumPixel:=Height[0]* Width[0]</l>
+<l>    tuple_length(Width,NumImage)</l>
+<l>    create_matrix (NumPixel,NumImage, 0, ImageGrayValueID)</l>
+<c>    **get gray vaule and assign to matrix</c>
+<l>    gen_rectangle1 (Rectangle1, 0, 0, Height[0]-1, Width[0]-1)</l>
+<l>    get_region_points (Rectangle1, Rows, Columns)  </l>
+<l>    channels_to_image (Images, MultiChannelImage)</l>
+<l>    get_grayval(MultiChannelImage, Rows, Columns,MultiChannelGrayval)</l>
+<l>    set_full_matrix (ImageGrayValueID, MultiChannelGrayval)</l>
+<l>    transpose_matrix_mod (ImageGrayValueID)</l>
+<c>    ******solve_matrix of  UnitaryNormals</c>
+<l>    create_matrix (2,NumPixel, 0, NormalsID) </l>
+<l>* count_seconds(S1)    </l>
+<l>    solve_matrix (LightDirectionMatrixID, 'general', 2.2204e-016, ImageGrayValueID, \
+                  NormalsID)</l>
+<l>* count_seconds(S2) </l>
+<l>* T11:=S2-S1   </l>
+<l>* stop()</l>
+<c>    **normalized the Normals and get albedo</c>
+<c>    *get Albedo</c>
+<l>    mult_element_matrix (NormalsID, NormalsID, Normals2ID)</l>
+<l>    sum_matrix (Normals2ID, 'columns', Normals2SumID)</l>
+<l>    sqrt_matrix (Normals2SumID, AlbedoID)</l>
+<c>    ***normalized the Normals </c>
+<l>*     repeat_matrix (AlbedoID, 3, 1, AlbedoRepeatedID)</l>
+<l>*     div_element_matrix (NormalsID, AlbedoRepeatedID, UnitaryNormalsID)</l>
+<c>    *decompose UnitaryNormals to  Ny Nz</c>
+<l>    get_sub_matrix (NormalsID, 0, 0, 1, NumPixel, NyID)</l>
+<l>    get_sub_matrix (NormalsID, 1, 0, 1, NumPixel, NzID)</l>
+<c>    *transform N(Ny,Nz) to gradient(q,1)</c>
+<l>    create_matrix (1,NumPixel, 1e-06, Zero)</l>
+<l>    add_matrix (NzID, Zero, NzID1)</l>
+<l>    div_element_matrix (NyID, NzID1, GradientYID)</l>
+<c>    ****transform to image size</c>
+<l>    gen_image_const (Albedo, 'real', Width[0], Height[0])</l>
+<l>    get_full_matrix (AlbedoID, AlbedoValues)</l>
+<l>    set_grayval (Albedo, Rows, Columns, AlbedoValues)</l>
+<c>    *</c>
+<l>    gen_image_const (Sy, 'real', Width[0], Height[0])</l>
+<l>    get_full_matrix (GradientYID, GradientYValues)</l>
+<l>    set_grayval (Sy, Rows, Columns, -GradientYValues)</l>
+<c></c>
+<l>*     stop()</l>
+<c></c>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="LinePSbyBRDF_0701">
+<parameters>
+<parameter id="Albedo"/>
+<parameter id="Images"/>
+<parameter id="Slants"/>
+<parameter id="Sy"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>

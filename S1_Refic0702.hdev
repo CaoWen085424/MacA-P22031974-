@@ -1,0 +1,1074 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="20.11.1.0">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_get_window (WindowHandle)</l>
+<l>dev_set_draw ('margin')</l>
+<l>dev_set_color ('blue')</l>
+<l>dev_set_line_width (3)</l>
+<c></c>
+<c>**********************************************************************************</c>
+<c>*</c>
+<c>**********************************************************************************</c>
+<c></c>
+<l>ImagesFold3:='D:/校正/pattern0624'</l>
+<l>ImagesFold31:='D:/6.24/5-17-110'</l>
+<c></c>
+<l>try</l>
+<l>    count_seconds(S1)</l>
+<l>    LoadSplitImages (SplitedImages, ImagesFold3)</l>
+<l>    count_seconds(S2)</l>
+<l>    TimeLoad:=S2-S1</l>
+<l>catch (Exception)</l>
+<l>    stop ()</l>
+<l>endtry</l>
+<l>try</l>
+<l>    count_seconds(S1)</l>
+<l>    LoadSplitImages (SplitedImages1, ImagesFold31)</l>
+<l>    count_seconds(S2)</l>
+<l>    TimeLoad:=S2-S1</l>
+<l>catch (Exception)</l>
+<l>    stop ()</l>
+<l>endtry</l>
+<c></c>
+<l>stop ()</l>
+<l>select_obj (SplitedImages, XF, [1,2,3,4])</l>
+<l>select_obj (SplitedImages, XB, 4+[1,2,3,4])</l>
+<l>select_obj (SplitedImages, YF, 8+[1,2,3,4])</l>
+<l>select_obj (SplitedImages, YB, 12+[1,2,3,4])</l>
+<c></c>
+<l>* select_obj (SplitedImages1, XF, [1,2,3,4])</l>
+<l>* select_obj (SplitedImages1, XB, 4+[1,2,3,4])</l>
+<l>* select_obj (SplitedImages1, YF, 8+[1,2,3,4])</l>
+<l>* select_obj (SplitedImages1, YB, 12+[1,2,3,4])</l>
+<c>***********************************************************************</c>
+<c>*mirror_image</c>
+<c>************************************************************************</c>
+<l>mirror_image (XF, XFMirr, 'column')</l>
+<l>select_obj (XFMirr, XF1, 1)</l>
+<l>select_obj (XFMirr, XF2, 2)</l>
+<l>select_obj (XFMirr, XF3, 3)</l>
+<l>select_obj (XFMirr, XF4, 4)</l>
+<l>add_image (XF1, XF2, XF12, 0.5, 0)</l>
+<l>add_image (XF3, XF4, XF34, 0.5, 0)</l>
+<l>add_image (XF12, XF34, XF1234, 0.5, 0)</l>
+<c>**************************</c>
+<l>select_obj (XB, XF1, 1)</l>
+<l>select_obj (XB, XF2, 2)</l>
+<l>select_obj (XB, XF3, 3)</l>
+<l>select_obj (XB, XF4, 4)</l>
+<l>add_image (XF1, XF2, XF12, 0.5, 0)</l>
+<l>add_image (XF3, XF4, XF34, 0.5, 0)</l>
+<l>add_image (XF12, XF34, XB1234, 0.5, 0)</l>
+<c>****************************************</c>
+<l>mirror_image (YF, YFMirr, 'column')</l>
+<l>rotate_image (YFMirr, YFRot, 90, 'constant')</l>
+<c>*</c>
+<l>select_obj (YFRot, XF1, 1)</l>
+<l>select_obj (YFRot, XF2, 2)</l>
+<l>select_obj (YFRot, XF3, 3)</l>
+<l>select_obj (YFRot, XF4, 4)</l>
+<l>add_image (XF1, XF2, XF12, 0.5, 0)</l>
+<l>add_image (XF3, XF4, XF34, 0.5, 0)</l>
+<l>add_image (XF12, XF34, YF1234, 0.5, 0)</l>
+<c>**************************</c>
+<l>rotate_image (YB, YBRot, 90, 'constant')</l>
+<c>**************************</c>
+<l>select_obj (YBRot, XF1, 1)</l>
+<l>select_obj (YBRot, XF2, 2)</l>
+<l>select_obj (YBRot, XF3, 3)</l>
+<l>select_obj (YBRot, XF4, 4)</l>
+<l>add_image (XF1, XF2, XF12, 0.5, 0)</l>
+<l>add_image (XF3, XF4, XF34, 0.5, 0)</l>
+<l>add_image (XF12, XF34, YB1234, 0.5, 0)</l>
+<l>stop ()</l>
+<c></c>
+<c></c>
+<c>******************************************************</c>
+<c>***********************************************************************</c>
+<c>*MAP</c>
+<c>************************************************************************</c>
+<l>    GridWidth:=39-2</l>
+<l>    GridSpace:=356 //pixel 356  374</l>
+<l>    GenHomByDotPattern0623 (XF1234, Map1, GridWidth, GridSpace, HomMat2D1)</l>
+<l>    GenHomByDotPattern0623 (XB1234, Map2, GridWidth, GridSpace, HomMat2D2)</l>
+<l>    GenHomByDotPattern0623 (YF1234, Map3, GridWidth, GridSpace, HomMat2D3)</l>
+<l>    GenHomByDotPattern0623 (YB1234, Map4, GridWidth, GridSpace, HomMat2D4)</l>
+<c>    </c>
+<c>************************************************</c>
+<l>serialize_hom_mat2d (HomMat2D1, SerializedItemHandle)</l>
+<l>open_file ('HomMat2D1.mat', 'output_binary', FileHandle)</l>
+<l>fwrite_serialized_item (FileHandle, SerializedItemHandle)</l>
+<l>close_file (FileHandle)</l>
+<c>*</c>
+<l>serialize_hom_mat2d (HomMat2D2, SerializedItemHandle)</l>
+<l>open_file ('HomMat2D2.mat', 'output_binary', FileHandle)</l>
+<l>fwrite_serialized_item (FileHandle, SerializedItemHandle)</l>
+<l>close_file (FileHandle)</l>
+<c>*</c>
+<l>serialize_hom_mat2d (HomMat2D3, SerializedItemHandle)</l>
+<l>open_file ('HomMat2D3.mat', 'output_binary', FileHandle)</l>
+<l>fwrite_serialized_item (FileHandle, SerializedItemHandle)</l>
+<l>close_file (FileHandle)</l>
+<c>*</c>
+<l>serialize_hom_mat2d (HomMat2D4, SerializedItemHandle)</l>
+<l>open_file ('HomMat2D4.mat', 'output_binary', FileHandle)</l>
+<l>fwrite_serialized_item (FileHandle, SerializedItemHandle)</l>
+<l>close_file (FileHandle)</l>
+<c>************************************************</c>
+<l>open_file ('HomMat2D1.mat', 'input_binary', FileHandle)</l>
+<l>fread_serialized_item (FileHandle, SerializedItemHandle)</l>
+<l>deserialize_hom_mat2d (SerializedItemHandle, HomMat2D11)</l>
+<l>close_file (FileHandle)</l>
+<c></c>
+<l>* read_tuple ('HomMat2D1', HomMat2D1)</l>
+<l>projective_trans_image_size (XF1234, TransImage1, HomMat2D1, 'bilinear', 15000, 11000, 'false')</l>
+<l>projective_trans_image_size (XB1234, TransImage2, HomMat2D2, 'bilinear', 15000, 11000, 'false')</l>
+<l>projective_trans_image_size (YF1234, TransImage3, HomMat2D3, 'bilinear', 15000, 11000, 'false')</l>
+<l>projective_trans_image_size (YB1234, TransImage4, HomMat2D4, 'bilinear', 15000, 11000, 'false')</l>
+<c>******************************************************</c>
+<l>* MoveImage0615 (TransImage2, TransImage2Move, -0, 0)</l>
+<l>* dev_display (TransImage1)</l>
+<l>dev_display (XF1234)</l>
+<l>compose3 (TransImage1, TransImage1, TransImage2, MultiChannelImage)</l>
+<l>compose3 (TransImage1, TransImage1, TransImage3, MultiChannelImage)</l>
+<l>compose3 (TransImage3, TransImage3, TransImage4, MultiChannelImage)</l>
+<c></c>
+<l>stop ()</l>
+<c>    </c>
+<c>    </c>
+<c>    </c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+<procedure name="FitYupleLine">
+<interface>
+<ic>
+<par name="Mx" base_type="ctrl" dimension="0"/>
+<par name="My" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="Y" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c>* 剔除0值</c>
+<l>tuple_length (Mx, length)</l>
+<l>tuple_gen_const (length, 0.0, ZeroTuple)</l>
+<l>tuple_equal_elem (My, ZeroTuple, Equal)</l>
+<l>tuple_find (Equal, 0, Indices)</l>
+<l>tuple_select (My, Indices, MyROI)</l>
+<l>tuple_select (Mx, Indices, MxROI)</l>
+<c>* **</c>
+<l>gen_contour_polygon_xld (Contour, MyROI, MxROI)</l>
+<c>* y = ax + b</c>
+<c>* y1 = ax1 + b</c>
+<c>* y2 = ax2 + b</c>
+<c>* ... .......</c>
+<c>* yn = ax + b</c>
+<c></c>
+<c>*     x              beta              y</c>
+<c>*  ---    ---                      ---   ---</c>
+<c>*  |  x1  1 |       ---  ---       |  y1   |</c>
+<c>*  |  x2  1 |       |  a   |       |  y2   |</c>
+<c>*  |  x3  1 |       |  b   |       |  y3   |</c>
+<c>*  |  .   . |       ---- ---       |   .   |</c>
+<c>*  |  .   . |                      |   .   |</c>
+<c>*  |  xn  1 |                      |  yn   |</c>
+<c>*  ----   ---                      ----  ---</c>
+<l>tuple_length (MxROI, len)</l>
+<l>create_matrix (len, 1, MyROI, y)</l>
+<l>create_matrix (len, 2, 1, x)</l>
+<l>set_value_matrix (x, [0:len-1], gen_tuple_const(len, 0), MxROI)</l>
+<c></c>
+<c>*    XT 代表X的转置   inv(*)代表*的逆</c>
+<c>*    x beta = y</c>
+<c>*    xT x beta  = xT y</c>
+<c>*    beta =  inv( xT x)  xT y</c>
+<c></c>
+<l>mult_matrix (x, x, 'ATB', xtx)</l>
+<l>mult_matrix (x, y, 'ATB', xty)</l>
+<c></c>
+<l>invert_matrix (xtx, 'general', 0, invxtx)</l>
+<c></c>
+<l>mult_matrix (invxtx, xty, 'AB', beta)</l>
+<c></c>
+<l>get_full_matrix (beta, Values)</l>
+<c></c>
+<l>Newy := Values[0] * MxROI + Values[1]</l>
+<c></c>
+<l>gen_contour_polygon_xld (Contour1, Newy, MxROI)</l>
+<l>gen_contour_polygon_xld (Contour1, MxROI, Newy)</l>
+<c>* **********补齐0值数据</c>
+<l>Y := My</l>
+<l>Y[Indices] := Newy</l>
+<c></c>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="FitYupleLine">
+<parameters>
+<parameter id="Mx"/>
+<parameter id="My"/>
+<parameter id="Y"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GenMap">
+<interface>
+<io>
+<par name="XF" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Map1" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="GridWidth" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<c></c>
+<c>**********************************************</c>
+<l>dev_display (XF)</l>
+<l>threshold (XF, Regions, 75, 255)</l>
+<l>closing_circle (Regions, RegionClosing, 350)</l>
+<l>fill_up (RegionClosing, RegionFillUp)</l>
+<l>connection (RegionFillUp, ConnectedRegions)</l>
+<l>select_shape_std (ConnectedRegions, STD, 'max_area', 70)</l>
+<l>erosion_circle (STD, RegionErosion1, 1200)</l>
+<c>*</c>
+<l>reduce_domain (XF, RegionErosion1, ImageReduced9)</l>
+<l>threshold (ImageReduced9, Regions, 0, 75)</l>
+<l>connection (Regions, ConnectedRegions)</l>
+<l>select_shape (ConnectedRegions, SelectedRegions6, 'area', 'and', 15000, 99999999)</l>
+<l>union1 (SelectedRegions6, RegionUnion6)</l>
+<l>fill_up (RegionUnion6, RegionFillUp3)</l>
+<l>opening_rectangle1 (RegionFillUp3, ROI1, 1900, 1900)</l>
+<l>area_center (ROI1, Area7, Row1, Column1)</l>
+<l>smallest_rectangle2 (ROI1, Row1, Column1, Phi1, Length11, Length21)</l>
+<l>gen_rectangle2 (Rectangle1, Row1, Column1, Phi1, Length11, Length21)</l>
+<l>Angel1:=deg(Phi1)</l>
+<l>dev_display (XF)</l>
+<l>dev_set_color ('red')</l>
+<l>dev_display (ROI1)</l>
+<l>dev_set_color ('green')</l>
+<l>dev_display (Rectangle1)</l>
+<l>* stop ()</l>
+<c>**********************************************</c>
+<c>**********************************************</c>
+<l>dilation_circle (ROI1, RegionDilation1, 505)</l>
+<l>reduce_domain (XF, RegionDilation1, ImageReduced10)</l>
+<l>threshold (ImageReduced10, Region6, 0, 75)</l>
+<l>opening_rectangle1 (Region6, RegionOpening4, 50, 50)</l>
+<l>opening_circle (RegionOpening4, Blake, 35)</l>
+<l>difference (RegionOpening4, Blake, RegionDifference)</l>
+<l>connection (RegionDifference, ConnectedRegions)</l>
+<l>select_shape (ConnectedRegions, SelectedRegions6, 'area', 'and', 200, 99999999)</l>
+<l>dilation_circle (ROI1, RegionDilation1, 100)</l>
+<l>intersection (RegionDilation1, SelectedRegions6, Corner)</l>
+<l>union1 (Corner, Corner)</l>
+<l>closing_circle (Corner, Corner, 5)</l>
+<l>connection (Corner, Corner)</l>
+<l>area_center (Corner, Area8, Row5, Column5)</l>
+<l>gen_cross_contour_xld (Cross, Row5, Column5, 160, rad(45))</l>
+<c>***************************************************</c>
+<l>DC:=0</l>
+<l>ColumnS:=Column5-DC</l>
+<l>Max:=max(ColumnS)</l>
+<l>dev_display (XF)</l>
+<l>dev_display (Cross)</l>
+<l>* stop ()</l>
+<l>dlCol:=Column5[1]-Column5[0]</l>
+<l>umPerpixel:=-30*1000.0/dlCol            //um/pixel</l>
+<l>umPerpixel:=22.2222222            //um/pixel</l>
+<l>* PixelP:=1000.0/45</l>
+<l>GridSpace:=30*1000.0/umPerpixel</l>
+<l>* GridWidth:=8</l>
+<c></c>
+<l>RowSortAll:=[]</l>
+<l>ColSortAll:=[]</l>
+<l>for Index := 0 to (|Column5|/GridWidth) -1 by 1</l>
+<l>    tuple_gen_sequence (0, GridWidth-1, 1, PerCol)</l>
+<l>    CurrCol:=PerCol+Index*GridWidth</l>
+<l>    tuple_select (Row5, [CurrCol], RR1)</l>
+<l>    tuple_select (Column5, [CurrCol], CC1)</l>
+<l>    tuple_sort_index (CC1, Indices1)</l>
+<l>    RowSort:=RR1[Indices1]</l>
+<l>    ColSort:=CC1[Indices1]</l>
+<l>    RowSortAll:=[RowSortAll,RowSort]</l>
+<l>    ColSortAll:=[ColSortAll,ColSort]</l>
+<l>    for Index1 := 0 to |RowSort| -1 by 1</l>
+<c>        </c>
+<l>        R:=RowSort[Index1]</l>
+<l>        C:=ColSort[Index1]</l>
+<l>        gen_circle (Circle3, R, C, 5)</l>
+<l>        dev_display (XF)</l>
+<l>        dev_display (Circle3)</l>
+<l>*         stop ()</l>
+<l>*         wait_seconds (0.1)</l>
+<l>    endfor</l>
+<c>    </c>
+<l>*     stop ()</l>
+<l>endfor</l>
+<l>* stop ()</l>
+<c></c>
+<l>get_image_size (XF, Width, Height)</l>
+<l>gen_arbitrary_distortion_map (Map1,int(GridSpace), RowSortAll, ColSortAll, \
+                              GridWidth, Width, Height, 'bilinear')</l>
+<l>* gen_arbitrary_distortion_map (Map2, int(GridSpace), RowSortAll, ColSortAll, \
+                              8, Width, Height, 'coord_map_sub_pix')</l>
+<c></c>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="GenMap">
+<parameters>
+<parameter id="GridWidth"/>
+<parameter id="Map1"/>
+<parameter id="XF"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GetLogoRegion">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Logo" base_type="iconic" dimension="0"/>
+</oo>
+<oc>
+<par name="LogoRow" base_type="ctrl" dimension="0"/>
+<par name="LogoColumn" base_type="ctrl" dimension="0"/>
+<par name="Angle" base_type="ctrl" dimension="0"/>
+<par name="Length1" base_type="ctrl" dimension="0"/>
+<par name="Length2" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<l>* dev_display (Image)</l>
+<l>binary_threshold (Image, Region, 'max_separability', 'light', UsedThreshold)</l>
+<l>threshold (Image, Regions, UsedThreshold, 255)</l>
+<l>fill_up (Regions, RegionFillUp)</l>
+<l>closing_circle (RegionFillUp, RegionClosing, 25)</l>
+<l>opening_circle (RegionClosing, RegionOpening, 35)</l>
+<l>connection (RegionOpening, ConnectedRegions)</l>
+<l>select_shape_std (ConnectedRegions, PartRegion, 'max_area', 70)</l>
+<l>smallest_rectangle2 (PartRegion, Row, Column, Phi, Length1, Length2)</l>
+<l>gen_rectangle2 (PartRect2, Row, Column, Phi, Length1, Length2)</l>
+<l>Angle:=deg(Phi)</l>
+<c>*</c>
+<l>erosion_circle (PartRegion, RegionErosion, 305)</l>
+<l>reduce_domain (Image, RegionErosion, ImageReduced)</l>
+<l>threshold (ImageReduced, Region1, 0, 90)</l>
+<l>opening_circle (Region1, RegionOpening, 5)</l>
+<l>fill_up (RegionOpening, RegionFillUp1)</l>
+<l>connection (RegionFillUp1, ConnectedRegions)</l>
+<l>select_shape_std (ConnectedRegions, Logo1, 'max_area', 70)</l>
+<l>difference (ConnectedRegions, Logo1, RegionDifference1)</l>
+<l>select_shape_std (RegionDifference1, Logo2, 'max_area', 70)</l>
+<l>union2 (Logo1, Logo2, Logo)</l>
+<l>union1 (Logo, Logo)</l>
+<l>area_center (Logo, Area, LogoRow, LogoColumn)</l>
+<l>dev_display (Image)</l>
+<l>dev_display (Logo)</l>
+<l>dev_display (PartRect2)</l>
+<l>LogoRow:=Row</l>
+<l>LogoColumn:=Column</l>
+<l>* stop ()</l>
+<c></c>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="GetLogoRegion">
+<parameters>
+<parameter id="Angle"/>
+<parameter id="Image"/>
+<parameter id="Length1"/>
+<parameter id="Length2"/>
+<parameter id="Logo"/>
+<parameter id="LogoColumn"/>
+<parameter id="LogoRow"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GenMapByDotPattern">
+<interface>
+<io>
+<par name="XF" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Map1" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="GridWidth" base_type="ctrl" dimension="0"/>
+<par name="GridSpace" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="GenMapByDotPattern">
+<parameters>
+<parameter id="GridSpace"/>
+<parameter id="GridWidth"/>
+<parameter id="Map1"/>
+<parameter id="XF"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GenMapByDotPatternY">
+<interface>
+<io>
+<par name="XF" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Map1" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="GridWidth" base_type="ctrl" dimension="0"/>
+<par name="GridSpace" base_type="ctrl" dimension="0"/>
+<par name="Offset" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="GenMapByDotPatternY">
+<parameters>
+<parameter id="GridSpace"/>
+<parameter id="GridWidth"/>
+<parameter id="Map1"/>
+<parameter id="Offset"/>
+<parameter id="XF"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="SplitImagesGPU">
+<interface>
+<io>
+<par name="PartXF" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Width_ImagesF" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="SumLight" base_type="ctrl" dimension="0"/>
+<par name="PullIndex" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<c>* Get list of all available compute devices.</c>
+<l>query_available_compute_devices (DeviceIdentifier)</l>
+<l>if (|DeviceIdentifier| != 1)</l>
+<l>    return ()</l>
+<l>endif</l>
+<c>* Open device.</c>
+<l>open_compute_device (DeviceIdentifier[0], DeviceHandle)</l>
+<c>* Deactivate asynchronous execution to obtain reliable benchmarks.</c>
+<l>set_compute_device_param (DeviceHandle, 'asynchronous_execution', 'false')</l>
+<c>* Call affine_trans_image on this device and measure the obtained speed-up.</c>
+<c>* Activate the compute device and perform the initialization of affine_trans_image.</c>
+<c>* If this is omitted, the initialization is performed with the first</c>
+<c>* call of affine_trans_image.</c>
+<l>init_compute_device (DeviceHandle, 'all')</l>
+<l>activate_compute_device (DeviceHandle)</l>
+<c></c>
+<l>count_seconds (S1)</l>
+<l>SplitImages (PartXF, Width_ImagesF, SumLight, PullIndex)</l>
+<l>count_seconds (S2)</l>
+<l>Time1 := S2-S1</l>
+<c>* Deactivate the device and perform the same benchmark on the CPU.</c>
+<l>deactivate_compute_device (DeviceHandle)</l>
+<c></c>
+<l>stop ()</l>
+<l>return ()</l>
+</body>
+<docu id="SplitImagesGPU">
+<parameters>
+<parameter id="PartXF"/>
+<parameter id="PullIndex"/>
+<parameter id="SumLight"/>
+<parameter id="Width_ImagesF"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GenMapByDotPatternYB">
+<interface>
+<io>
+<par name="XF" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Map1" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="GridWidth" base_type="ctrl" dimension="0"/>
+<par name="GridSpace" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<xb>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</xb>
+<docu id="GenMapByDotPatternYB">
+<parameters>
+<parameter id="GridSpace"/>
+<parameter id="GridWidth"/>
+<parameter id="Map1"/>
+<parameter id="XF"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="CheckRect">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+</interface>
+<body>
+<c></c>
+<c>**********************************************</c>
+<l>dev_display (Image)</l>
+<l>threshold (Image, Regions, 80, 255)</l>
+<l>closing_circle (Regions, RegionClosing, 305)</l>
+<l>fill_up (RegionClosing, Part)</l>
+<l>erosion_circle (Part, RegionErosion, 10)</l>
+<l>reduce_domain (Image, RegionErosion, ImageReduced)</l>
+<l>threshold (ImageReduced, Holls, 0, 80)</l>
+<l>fill_up (Holls, Holls)</l>
+<l>opening_circle (Holls, RegionOpening1, 35)</l>
+<l>connection (RegionOpening1, ConnectedRegions)</l>
+<l>select_shape (ConnectedRegions, Holl1, 'area', 'and', 3000, 99999)</l>
+<l>union1 (Holl1, RegionUnion)</l>
+<l>smallest_rectangle2 (RegionUnion, Row, Column, Phi, Length1, Length2)</l>
+<l>gen_rectangle2 (Rectangle, Row, Column, Phi, Length1-300, Length2-300)</l>
+<l>intersection (RegionUnion, Rectangle, RegionIntersection)</l>
+<l>opening_circle (RegionIntersection, RegionOpening, 35)</l>
+<l>closing_circle (RegionOpening, RegionClosing1, 35)</l>
+<l>union1 (RegionClosing1, RegionUnion1)</l>
+<l>connection (RegionUnion1, ConnectedRegions1)</l>
+<l>count_obj (ConnectedRegions1, Number)</l>
+<l>area_center (ConnectedRegions1, Area, Row3, Column1)</l>
+<c>*</c>
+<l>gen_contour_region_xld (ConnectedRegions1, Contours, 'border')</l>
+<l>fit_circle_contour_xld (Contours, 'algebraic', -1, 0, 0, 3, \
+2, Rows, Columns, Radius, StartPhi, EndPhi, PointOrder)</l>
+<l>gen_circle_contour_xld (ContCircle, Rows, Columns, Radius, \
+                        StartPhi, EndPhi, 'positive', 1)</l>
+<l>gen_region_points (Region3, Rows, Columns)</l>
+<l>smallest_rectangle2 (Region3, Row, Column, Phi, Length1, Length2)</l>
+<l>gen_rectangle2 (Rectangle, Row, Column, Phi, Length1, Length2)</l>
+<l>Angle:=deg(Phi)</l>
+<c>***********************************</c>
+<l>rotate_image (Image, ImageRotate, -Angle, 'constant')</l>
+<l>reduce_domain (ImageRotate, RegionErosion, ImageReduced)</l>
+<l>threshold (ImageReduced, Holls, 0, 80)</l>
+<l>fill_up (Holls, Holls)</l>
+<l>connection (Holls, ConnectedRegions)</l>
+<l>select_shape (ConnectedRegions, Holl1, 'area', 'and', 3000, 99999)</l>
+<l>union1 (Holl1, RegionUnion)</l>
+<l>smallest_rectangle2 (RegionUnion, Row, Column, Phi, Length1, Length2)</l>
+<l>gen_rectangle2 (Rectangle, Row, Column, Phi, Length1-300, Length2-300)</l>
+<l>intersection (RegionUnion, Rectangle, RegionIntersection)</l>
+<l>opening_circle (RegionIntersection, RegionOpening, 35)</l>
+<l>closing_circle (RegionOpening, RegionClosing1, 35)</l>
+<l>union1 (RegionClosing1, RegionUnion1)</l>
+<l>connection (RegionUnion1, ConnectedRegions1)</l>
+<l>count_obj (ConnectedRegions1, Number)</l>
+<l>area_center (ConnectedRegions1, Area, Row3, Column1)</l>
+<c>*</c>
+<l>gen_contour_region_xld (ConnectedRegions1, Contours, 'border')</l>
+<l>fit_circle_contour_xld (Contours, 'algebraic', -1, 0, 0, 3, \
+2, Rows, Columns, Radius, StartPhi, EndPhi, PointOrder)</l>
+<l>gen_circle_contour_xld (ContCircle, Rows, Columns, Radius, \
+                        StartPhi, EndPhi, 'positive', 1)</l>
+<l>gen_region_points (Region3, Rows, Columns)</l>
+<l>smallest_rectangle2 (Region3, Row, Column, Phi, Length1, Length2)</l>
+<l>gen_rectangle2 (Rectangle, Row, Column, Phi, Length1, Length2)</l>
+<l>Angle:=deg(Phi)</l>
+<c>*test0621*********************************</c>
+<l>* hom_mat2d_identity (HomMat2DIdentity)</l>
+<l>* Theta:=-0.15</l>
+<l>* hom_mat2d_slant_local (HomMat2DIdentity, rad(Theta), 'x', HomMat2DSlant)</l>
+<l>* affine_trans_image (ImageRotate, ImageAffineTrans, HomMat2DSlant, 'nearest_neighbor', 'false')</l>
+<l>* dev_display (ImageRotate)</l>
+<l>* dev_display (ImageAffineTrans)</l>
+<c></c>
+<l>* reduce_domain (ImageAffineTrans, RegionErosion, ImageReduced)</l>
+<l>* threshold (ImageReduced, Holls, 0, 80)</l>
+<l>* fill_up (Holls, Holls)</l>
+<l>* connection (Holls, ConnectedRegions)</l>
+<l>* select_shape (ConnectedRegions, Holl1, 'area', 'and', 3000, 99999)</l>
+<l>* union1 (Holl1, RegionUnion)</l>
+<l>* smallest_rectangle2 (RegionUnion, Row, Column, Phi, Length1, Length2)</l>
+<l>* gen_rectangle2 (Rectangle, Row, Column, Phi, Length1-300, Length2-300)</l>
+<l>* intersection (RegionUnion, Rectangle, RegionIntersection)</l>
+<l>* opening_circle (RegionIntersection, RegionOpening, 35)</l>
+<l>* closing_circle (RegionOpening, RegionClosing1, 35)</l>
+<l>* union1 (RegionClosing1, RegionUnion1)</l>
+<l>* connection (RegionUnion1, ConnectedRegions1)</l>
+<l>* count_obj (ConnectedRegions1, Number)</l>
+<l>* area_center (ConnectedRegions1, Area, Row3, Column1)</l>
+<c>*</c>
+<l>* gen_contour_region_xld (ConnectedRegions1, Contours, 'border')</l>
+<l>* fit_circle_contour_xld (Contours, 'algebraic', -1, 0, 0, 3, \
+2, Rows, Columns, Radius, StartPhi, EndPhi, PointOrder)</l>
+<l>* gen_circle_contour_xld (ContCircle, Rows, Columns, Radius, \
+                        StartPhi, EndPhi, 'positive', 1)</l>
+<l>* gen_region_points (Region3, Rows, Columns)</l>
+<l>* smallest_rectangle2 (Region3, Row, Column, Phi, Length1, Length2)</l>
+<l>* gen_rectangle2 (Rectangle, Row, Column, Phi, Length1, Length2)</l>
+<l>* Angle:=deg(Phi)</l>
+<l>* dev_display (ImageAffineTrans)</l>
+<l>* dev_display (Region3)</l>
+<l>* dev_display (Rectangle)</l>
+<l>* stop ()</l>
+<c>**********************************</c>
+<l>dev_display (ImageRotate)</l>
+<l>dev_display (ContCircle)</l>
+<l>dev_set_color ('green')</l>
+<l>dev_set_line_width (3)</l>
+<l>dev_display (Region3)</l>
+<l>dev_set_line_width (1)</l>
+<l>dev_set_color ('red')</l>
+<l>dev_display (Rectangle)</l>
+<l>SumPoint:=|Rows|</l>
+<l>GridWidth:=31</l>
+<l>RowSum:=|Rows|/GridWidth</l>
+<l>stop ()</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="CheckRect">
+<parameters>
+<parameter id="Image"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="LoadSplitImages">
+<interface>
+<oo>
+<par name="SplitedImages" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="ImagesFold3" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>list_image_files (ImagesFold3, 'default', [], ImageFiles)</l>
+<l>ImgNum := |ImageFiles|</l>
+<l>gen_empty_obj (RawImages)</l>
+<l>for Index := 0 to ImgNum-1 by 1</l>
+<l>    CurrentImgFile := ImageFiles[Index]</l>
+<l>parse_filename (CurrentImgFile, BaseName, Extension, Directory)</l>
+<l>    tuple_strlen (BaseName, Len)</l>
+<l>*     tuple_substr (BaseName, Len-2, Len-1, Substring)</l>
+<l>    if (BaseName='XF-1')</l>
+<l>        read_image (XF1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XF-2')</l>
+<l>        read_image (XF2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XF-3')</l>
+<l>        read_image (XF3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XF-4')</l>
+<l>        read_image (XF4, ImageFiles[Index])</l>
+<l>    endif</l>
+<c></c>
+<l>    if (BaseName='XB-1')</l>
+<l>        read_image (XB1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XB-2')</l>
+<l>        read_image (XB2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XB-3')</l>
+<l>        read_image (XB3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='XB-4')</l>
+<l>        read_image (XB4, ImageFiles[Index])</l>
+<l>    endif</l>
+<c></c>
+<l>    if (BaseName='YF-1')</l>
+<l>        read_image (YF1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YF-2')</l>
+<l>        read_image (YF2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YF-3')</l>
+<l>        read_image (YF3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YF-4')</l>
+<l>        read_image (YF4, ImageFiles[Index])</l>
+<l>    endif</l>
+<c></c>
+<l>    if (BaseName='YB-1')</l>
+<l>        read_image (YB1, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YB-2')</l>
+<l>        read_image (YB2, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YB-3')</l>
+<l>        read_image (YB3, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (BaseName='YB-4')</l>
+<l>        read_image (YB4, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>endfor</l>
+<c></c>
+<l>concat_obj (XF1, XF2, ObjectsConcat2)</l>
+<l>concat_obj (ObjectsConcat2, XF3, ObjectsConcat3)</l>
+<l>concat_obj (ObjectsConcat3, XF4, XFS)</l>
+<c></c>
+<l>concat_obj (XB1, XB2, ObjectsConcat2)</l>
+<l>concat_obj (ObjectsConcat2, XB3, ObjectsConcat3)</l>
+<l>concat_obj (ObjectsConcat3, XB4, XBS)</l>
+<c></c>
+<l>concat_obj (YF1, YF2, ObjectsConcat2)</l>
+<l>concat_obj (ObjectsConcat2, YF3, ObjectsConcat3)</l>
+<l>concat_obj (ObjectsConcat3, YF4, YFS)</l>
+<c></c>
+<l>concat_obj (YB1, YB2, ObjectsConcat2)</l>
+<l>concat_obj (ObjectsConcat2, YB3, ObjectsConcat3)</l>
+<l>concat_obj (ObjectsConcat3, YB4, YBS)</l>
+<c></c>
+<l>concat_obj (XFS, XBS, xs)</l>
+<l>concat_obj (YFS, YBS, ys)</l>
+<l>concat_obj (xs, ys, SplitedImages)</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="LoadSplitImages">
+<parameters>
+<parameter id="ImagesFold3"/>
+<parameter id="SplitedImages"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GenMapByDotPattern0622">
+<interface>
+<io>
+<par name="XF" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Map1" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="GridWidth" base_type="ctrl" dimension="0"/>
+<par name="GridSpace" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="HomMat2D" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<xb>aE+Y3CC2dxv1W4jj53jAS+4gXVQFCUUn3SGw9QPU0DYoR+Bl6getRaDwiMCTQGab/FwTNSwaTjFmx8rCEDS00DmEpeC9IUUv71xWhmUUfzMq65a9s050h0ZhMnVoVtMKRJWW3iPKJTE6+fmib1YTOn2+Waf9Z2Xc0/brJP5HCty0oaxreHSgOfxQk+NoN0Szajtesx6uys/BCBGId2yhUsr4TXCeMrhHTtE7opsI0tJGdZUYVm36IhA2EV1dX3TjLExa8upVBq3hpNkvofJx3dxt60ELrc/iUYwqPX0nLwus1Tl71F4/jWfxhFqCRGGc3X5OTEf7uN/20QuOjgHvFskvD4IVc5bnA5thvdPNPzDq6z130PiQtViajwrMXoi9eBIeRhwULDFSinC9JpI4Tp2Wawiapv36j3J1oZnOT42VVr4uyJzF0UnMqsArTahZboOK/0+zewJFrYpmQIIixnOEAAPKhdA1J+VAHHqXViCgmyOR7EHEFc71lzS09DaLJ+/rxGrYZCYCtl+xtf+ijFu3Wb63pYCA/tS45ag/r2tAJ+zBMKBkDd9qDzRM51cLanawItzqt+/FsBYgI3JjwO9CYrtbl0VG7RJcqFIb0JqLe7iMGLIkcvv/gl1xsmr7RJS16yvNiYKNj94RWKFlreJbejVAkiKOuqhfBjWw/LUCtsHmO3VS8ud7unhDXxFG50JSHp0txS0biV77JmnhdfWZGPQzwvwg2WKh0brkkXdeEttYOlMAf6v42Xhm0k6O43YId6kW+nj6gZyTMTK8vIMiK0XcJh1GhNzkXvmokkbJILZtq+XqoHGTC5O3Jreiw8UysGBnBlDwJ2cSZ0HG0g9q1V07CitlgdJzaGY0gJSPWO2zy7pzFz0PjQj5avRgiQZAPD1m4+sKeGqbHyvIY/gtJTtF6VrevPDHEDTooxZhttzy5uarLqpPjIcd1o9f4c6s5bpeeCDaQlthpUElU9j9Tt9kBzIZmkf75oQNPjMRwIVNlLMtCZ87iirkB7atjX67qzBfkuwc+f68qRGYu2tcnDWgCrv+/cwcz1746XLljrQ4B+u4cBEKKIpu+sAJvn+nPif/OWxlYR4LeMPif1AzkMtB4oygj37opi1EBB1uOp6FqOr0LfPDCGQiU7Z43GiVvsx6kkUQNi3e0iz54SS8rZytyjnoTfSc8WmfQEpEU9r8kH4AnV/EP8G2vvcIUSKImNlmcDihKyG75v3aHvRfvIljfwEWZMiVmBlS/jM92QV1gkxMPkaJE9n//+PIXrvV8MePG/9O3V6rKejcJ3Q+nfFYN9kv2vrST/iuf2x3Bx7qefgz6AWyVxxY4OsMe2LqQqIqqebzc3Y0Rkq2yUlECDjFNNvwyyJ9EG92ta1B+49BIpJbdpgdnkE/QoXQtt6eeWGDxxKCqHu9YeX03A/IwMfTBO6lcSHsKqfvHdAwEMYfW/PZg36+jZ0gDCroq10HlREKL2uENEtaI6MujM6pI2vXYcGRwcy2FShTBGTDO6gKv32oT/y1ad86+EsnEhNxa8G7BrV1GW6fOv+Gn2t0o5bYJhbAsMR2rYDQ6KxLx2Kb1Bl8qn+KxLIHADyoFSA2lTDp897jARBXaLoYcWd8wZTN0GIrXWyUhZm5Yj2IlX71kMPui4K7pOHB4i9BLQPnbzLE+iiUDrG7ZHJ2WWm3YMJOvta2hQ9NWosqHojhTagXD6joj4LQ6SJHGCpxFoTTZhXffgem0XOOP4W+s1pILChfu03QzEC1p/72V1HgD52ynKWEtm/V+BjKxQ7dGvrRkTTKoRdy7FLV5vyXUUgUNE4hy/idfWrhdsYz8O5F2DLDGvgHn7B60bUeHFe5u17CX9v5dZ2B7Dhlwi4Cc5sDpCQzalP0pPGNyeblaTA9tFrcodi/rDG8vxPpVyy634MgYYeANMIjvqo5LFQRL/7YXMzAtAaRUNqw7A9fKW7V1PKPoQwhsRwJCAbZ/BTELiZ5VuVyNJDQXd/leMRcj8Fl20vr7b+EWw+Kqv/dXBsKDy1apreV4JMqFiGcpHnt1aZxFL4wCA2valYXQdj2pGm1mpaX9JrB2SwuVqEWTHTnroFWZNFFww9MmPp3t0Mph9g0TBmkewKkgzNPyLW8he/SQq5tf5cxOjXQmgZIdw59otswHwIJdDLUu7EaQYC3bvjP3BiBMAOFzNNkI/AjMuH/ZRh7M/l08GFMYxhuO1KauwZEdeHSxto/rE0fy6cwBLWhu3Gp8/6OHavJmawIh709qw9NRxB6ebCVH6m37FjEO+jEt+g/chscF2+FDb6yocPV1Z8JEwbh+wZyXon99Uxm/r8rR+eBsL5ZCq/uannUQDHPKfTpl6O4JqaeiKP8d3/9s8K9rxVPxiovqBwrfJPf/0/a8ubCKayfmvsoxKxz4fLAobH6pXUidwIoGYLmPhjgFjiMMbrR3Bc4AN+T78J0PN//nhwjhbYWwT4gqO0ijH9b+PffgNZGpnSaydtLosnSNkZC0nKmAb4VIwM3W/pdSYVwxx9cHZi7S0cOE3sE8Xs/Qq23tjVBCyLRF5ngYhKkPwG+9Lih5U9YkXNCx+Sbk0GD+173x6MNodGGGEkB5i435+suIL5hom5eV8ogehW9CfiY5KBXsbafPmP7oIi9125IC35qgj3AU6qp0dGEur34cjro6Mz4idxGEBNa/WRLPp9QuzlOOBSLy3Nx6HQ+Dq5kYOMWWj5MIJ6GKlhun0vKsHS5grgo3LysOsyhU8gUxdCL33vOPbUaAmtjf1yrU+Xum+llgUy/SRYafrnTtSGzYVBDD/vwwpW4ACuD+jThjbNtz+fz+V/LWeyjcldXsTfVRH9WKa9rR1jmR2ZJHHJqPqlwn7TupZ6bcCLwOZEGlcnl34ahb6C6ySJrdpQ23mT+uTdJx/n4On1DpBCU+NYObMlHpJ61InWXaLcpGEVDrEsxIqPHEXAV/Caj2I6NS9q+G7n3VrqVvN/y+/rkoPvkrKLV9uvgHnJrICUMKjmFKZ2IhfyVqSrXDK+cWzp/woNhNqjWk/4iu4WN8ybhbDTwPW5uFM0xjq1bdFMIcRD8el00gyeaIrRgzSpVgBFw9wrQa0pZbE4Tmx25wGJ7Vz5/5qsqkNCKJPxr48DCtgxwVCa0qZbf+DUcfX7urB4FOxg8OjTsQtlqK5DxxI2iyXjaqkPN46bamP487B+jTwUatjS+TQ7GKSSWX+maPb7DA1wrimCCounSPmcTNRIAgWDwiZ5//zpIv4KOcPhQXgd3J3IuW7EFJsW7oiUSHcykLy08Cmaot6lYy7RS5QeYTJdCYuqJPQ+kwv8cUTDvMtCTRWpyfUJBU9DSRCXHHqWDwYw7dhWKBPzTCBa0hrgsMCP0Q9uAmnPawUnNO5Hqbd79bw3r8w/dvnWA3izf7zRug9MLkwLb9S3D/xPX0ScMGRJwXkQOcYkQo2SltRXKFrkEr4k7RnV3C2mcEdpKbGHskOc56YYP4FtfSYVh7fiqdxwTf5r+cmBVvOwJmawn8NEZL2qHT0KYihEt7n7oG4Cf7MDzOnmCDktWzMMakP0X3CpmgTEXxfHe1Zra5pGXCw1wIRZI/+cn9jkiFclD8qLLGpE2vBCFfn5+hScUpK4gEshCdYIRgJvoKBdRYudvHypR375iPHVkrMZM7Q+zXX7x6+zPGizwI1Obl4NvwEZgjLVfqTBKJ3FtO47AFa+7pNBa94y5ZM+/iYKxnkRfvnRUOJhcHtUZgc/XncWsFbqLCTUgqlDK8kohDrd9TvjibD/uiaDgpEfUIuU1DCG/vpjGkulLHt0IctBsX0/G5AHdAql3xwN2E9bghiI1F2d3V1GOP8akcqhmzTp2tf/6dkT2ibMXXmaYcrj1YhxSw2cbTouTmzdflK6lkJrGPThncXc412WPsGVyWkjYQu8fUMMehl7zj6LNYKcTOLnReiWGgWliYSoWJr1IeneRCitEs1Pg/takl2dcQ/MJMTWhbtRj5nx2sVi3hmnwdkb1KtKwNy4CcCfBwJDnVYfrTUY4Ean7xUtWjillrGaQsPdfqBJdSzpO8ex98Iz6Ktmq31nS92XAbeyuskz7Uw4YcWJzHg/gtr2d6XXRlYLkodHnDOnBVKjNGAEBhvPWT/aELPtuJFCIm+Ys5dC9StK7JzQ/iAMV6Rfzg34+lXEotgv+l+h0IzmXFo+Sy5PiApxy9u5L+5qiqMoAUrujuBcGNBnS4BaxzeP+ubHHk6gRpH7HICs7VBallSrZpWcdHutGA9IXSQF2rZGRiQ</xb>
+<docu id="GenMapByDotPattern0622">
+<parameters>
+<parameter id="GridSpace"/>
+<parameter id="GridWidth"/>
+<parameter id="HomMat2D"/>
+<parameter id="Map1"/>
+<parameter id="XF"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="LoadRawImages">
+<interface>
+<oo>
+<par name="XF" base_type="iconic" dimension="0"/>
+<par name="XB" base_type="iconic" dimension="0"/>
+<par name="YF" base_type="iconic" dimension="0"/>
+<par name="YB" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="ImagesFold3" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<l>list_image_files (ImagesFold3, 'default', [], ImageFiles)</l>
+<l>ImgNum := |ImageFiles|</l>
+<l>gen_empty_obj (RawImages)</l>
+<l>for Index := 0 to ImgNum-1 by 1</l>
+<l>    CurrentImgFile := ImageFiles[Index]</l>
+<l>parse_filename (CurrentImgFile, BaseName, Extension, Directory)</l>
+<l>    tuple_strlen (BaseName, Len)</l>
+<l>    tuple_substr (BaseName, Len-2, Len-1, Substring)</l>
+<l>    if (Substring='XF')</l>
+<l>        read_image (XF, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='XB')</l>
+<l>        read_image (XB, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='YF')</l>
+<l>        read_image (YF, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>    if (Substring='YB')</l>
+<l>        read_image (YB, ImageFiles[Index])</l>
+<l>    endif</l>
+<l>endfor</l>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="LoadRawImages">
+<parameters>
+<parameter id="ImagesFold3"/>
+<parameter id="XB"/>
+<parameter id="XF"/>
+<parameter id="YB"/>
+<parameter id="YF"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="MoveImage0615">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="ImageMoved" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="MoveRow" base_type="ctrl" dimension="0"/>
+<par name="MoveCo" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c></c>
+<c>* ***********************************************************************</c>
+<c>* ***********************************************************************</c>
+<l>hom_mat2d_identity (HomMat2DIdentity)</l>
+<l>hom_mat2d_translate_local (HomMat2DIdentity, MoveRow, MoveCo, HomMat2DTranslate)</l>
+<l>affine_trans_image (Image, ImageMoved, HomMat2DTranslate, 'constant', 'false')</l>
+<l>* dev_clear_window ()</l>
+<l>* dev_display (Image)</l>
+<l>* dev_display (ImageMoved)</l>
+<l>* add_image (Image, ImageMoved, ImageResult, 0.5, 0)</l>
+<l>* stop ()</l>
+<l>return ()</l>
+</body>
+<docu id="MoveImage0615">
+<parameters>
+<parameter id="Image"/>
+<parameter id="ImageMoved"/>
+<parameter id="MoveCo"/>
+<parameter id="MoveRow"/>
+</parameters>
+</docu>
+</procedure>
+<procedure name="GenHomByDotPattern0623">
+<interface>
+<io>
+<par name="XF" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="Map1" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="GridWidth" base_type="ctrl" dimension="0"/>
+<par name="GridSpace" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="HomMat2D" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c>**********************************************</c>
+<l>dev_display (XF)</l>
+<l>threshold (XF, Regions, 80, 255)</l>
+<l>closing_circle (Regions, RegionClosing, 105)</l>
+<l>shape_trans (RegionClosing, RegionClosing, 'convex')</l>
+<l>connection (RegionClosing, ConnectedRegions)</l>
+<l>select_shape_std (ConnectedRegions, SelectedRegions, 'max_area', 70)</l>
+<l>closing_circle (SelectedRegions, RegionClosing, 105)</l>
+<l>fill_up (RegionClosing, Part)</l>
+<l>erosion_circle (Part, RegionErosion, 1)</l>
+<l>reduce_domain (XF, RegionErosion, ImageReduced)</l>
+<l>threshold (ImageReduced, Holls, 0, 80)</l>
+<l>fill_up (Holls, Holls)</l>
+<l>opening_circle (Holls, RegionOpening1, 35)</l>
+<l>connection (RegionOpening1, ConnectedRegions)</l>
+<l>select_shape (ConnectedRegions, Holl1, 'area', 'and', 6000, 99999)</l>
+<l>select_shape (Holl1, Holl1, 'circularity', 'and', 0.5, 1)</l>
+<l>union1 (Holl1, RegionUnion)</l>
+<l>smallest_rectangle2 (RegionUnion, Row, Column, Phi, Length1, Length2)</l>
+<l>gen_rectangle2 (Rectangle, Row, Column, Phi, Length1-300, Length2-300)</l>
+<l>intersection (RegionUnion, Rectangle, RegionIntersection)</l>
+<l>opening_circle (RegionIntersection, RegionOpening, 35)</l>
+<l>closing_circle (RegionOpening, RegionClosing1, 35)</l>
+<l>union1 (RegionClosing1, RegionUnion1)</l>
+<l>connection (RegionUnion1, ConnectedRegions1)</l>
+<l>count_obj (ConnectedRegions1, Number)</l>
+<l>area_center (ConnectedRegions1, Area, Row3, Column1)</l>
+<c>*</c>
+<l>gen_contour_region_xld (ConnectedRegions1, Contours, 'border')</l>
+<l>fit_circle_contour_xld (Contours, 'algebraic', -1, 0, 0, 3, \
+2, Rows, Columns, Radius, StartPhi, EndPhi, PointOrder)</l>
+<l>gen_circle_contour_xld (ContCircle, Rows, Columns, Radius, \
+                        StartPhi, EndPhi, 'positive', 1)</l>
+<l>gen_region_points (Region3, Rows, Columns)</l>
+<l>smallest_rectangle2 (Region3, Row, Column, Phi, Length1, Length2)</l>
+<l>gen_rectangle2 (Rectangle, Row, Column, Phi, Length1, Length2)</l>
+<l>Angle:=deg(Phi)</l>
+<c></c>
+<l>dev_display (XF)</l>
+<l>dev_display (ContCircle)</l>
+<l>dev_set_color ('green')</l>
+<l>dev_set_line_width (3)</l>
+<l>dev_display (Region3)</l>
+<l>dev_set_line_width (1)</l>
+<l>dev_set_color ('red')</l>
+<l>dev_display (Rectangle)</l>
+<l>SumPoint:=|Rows|</l>
+<l>* GridWidth:=39//28</l>
+<l>RowSum:=|Rows|/GridWidth</l>
+<l>* stop ()</l>
+<c></c>
+<l>tuple_gen_sequence (0, GridWidth-1, 1, PerCol)</l>
+<l>CurrCol:=PerCol+0*GridWidth</l>
+<l>tuple_select (Rows, [CurrCol], RR1)</l>
+<l>tuple_select (Columns, [CurrCol], CC1)</l>
+<l>tuple_sort_index (CC1, Indices1)</l>
+<l>RowSort:=RR1[Indices1]</l>
+<l>ColSort:=CC1[Indices1]</l>
+<l>gen_circle (Circle1, RowSort[0], ColSort[0], Radius[0])</l>
+<l>gen_circle (Circle2, RowSort[GridWidth-1], ColSort[GridWidth-1], Radius[GridWidth-1])</l>
+<l>dev_display (XF)</l>
+<l>dev_display (Circle1)</l>
+<l>dev_display (Circle2)</l>
+<l>distance_pp (RowSort[0], ColSort[0], RowSort[GridWidth-1], ColSort[GridWidth-1], DistanceX)</l>
+<l>gen_region_line (RegionLinesX,RowSort[0], ColSort[0], RowSort[GridWidth-1], ColSort[GridWidth-1])</l>
+<l>mmPerPixelX:=(GridWidth-1)*8/DistanceX  //mm/pixel</l>
+<l>GridSpace1:=DistanceX/(GridWidth-1)   //pixel</l>
+<l>* GridSpace:=356  //pixel</l>
+<l>mmPerPixelMap:=1000*8.0/GridSpace</l>
+<l>* stop ()</l>
+<c></c>
+<l>tuple_gen_sequence (0, GridWidth-1, 1, PerCol)</l>
+<l>CurrCol:=PerCol+(RowSum-1)*GridWidth</l>
+<l>tuple_select (Rows, [CurrCol], RR1)</l>
+<l>tuple_select (Columns, [CurrCol], CC1)</l>
+<l>tuple_sort_index (CC1, Indices1)</l>
+<l>RowSortY:=RR1[Indices1]</l>
+<l>ColSortY:=CC1[Indices1]</l>
+<l>gen_circle (Circle1, RowSortY[0], ColSortY[0], Radius[0])</l>
+<l>gen_circle (Circle2, RowSortY[GridWidth-1], ColSortY[GridWidth-1], Radius[GridWidth-1])</l>
+<l>* dev_display (XF)</l>
+<l>dev_display (Circle1)</l>
+<l>dev_display (Circle2)</l>
+<l>distance_pp (RowSortY[0], ColSortY[0], RowSortY[GridWidth-1], ColSortY[GridWidth-1], DistanceX2)</l>
+<l>distance_pp (RowSort[0], ColSort[0], RowSortY[0], ColSortY[0], DistanceY1)</l>
+<l>gen_region_line (RegionLines,RowSort[0], ColSort[0], RowSortY[0], ColSortY[0])</l>
+<l>mmPerPixelY:=(26-1)*8/DistanceY1  //mm/pixel</l>
+<c></c>
+<l>Rato:=mmPerPixelY/mmPerPixelX//1.05712</l>
+<l>Rato:=mmPerPixelX/mmPerPixelY//0.945963</l>
+<l>GridSpace1:=DistanceX2/(GridWidth-1)   //pixel</l>
+<l>* GridSpace:=356  //pixel 374</l>
+<l>mmPerPixelMap:=1000*8.0/GridSpace</l>
+<l>* stop ()</l>
+<c>*SortAll**************************************************</c>
+<l>RowSortAll:=[]</l>
+<l>ColSortAll:=[]</l>
+<l>for Index := 0 to (|Columns|/GridWidth) -1 by 1</l>
+<l>    tuple_gen_sequence (0, GridWidth-1, 1, PerCol)</l>
+<l>    CurrCol:=PerCol+Index*GridWidth</l>
+<l>    tuple_select (Rows, [CurrCol], RR1)</l>
+<l>    tuple_select (Columns, [CurrCol], CC1)</l>
+<l>    tuple_sort_index (CC1, Indices1)</l>
+<l>    RowSort:=RR1[Indices1]</l>
+<l>    ColSort:=CC1[Indices1]</l>
+<c>    *</c>
+<l>    RowSortAll:=[RowSortAll,RowSort]</l>
+<l>    ColSortAll:=[ColSortAll,ColSort]</l>
+<l>*     dev_display (XF)</l>
+<l>*     for Index1 := 0 to |RowSort| -1 by 1    </l>
+<l>*         R:=RowSort[Index1]</l>
+<l>*         C:=ColSort[Index1]</l>
+<l>*         gen_circle (Circle0, R, C, 5)</l>
+<l>*         dev_display (Circle0)</l>
+<l>*         stop ()</l>
+<l>*         wait_seconds (0.1)</l>
+<l>*     endfor</l>
+<l>*     stop ()</l>
+<l>endfor</l>
+<l>gen_circle (CircleAll, RowSortAll, ColSortAll, ColSortAll-ColSortAll+25)</l>
+<l>dev_display (XF)</l>
+<l>dev_display (CircleAll)</l>
+<l>* stop ()</l>
+<c></c>
+<l>ColNum:=GridWidth</l>
+<l>PointSum:=|RowSortAll|</l>
+<l>RowNum:=PointSum/ColNum</l>
+<l>get_image_size (XF, Width, Height)</l>
+<l>tuple_gen_sequence (0, (ColNum-1)*GridSpace, GridSpace, GCol1)</l>
+<l>tuple_gen_sequence (0, (RowNum-1)*GridSpace, GridSpace, GRow1)</l>
+<l>gen_region_line (RegionLinesY, GCol1-GCol1, GCol1, \
+                 GCol1-GCol1+Height, GCol1)</l>
+<l>gen_region_line (RegionLinesX, GRow1, GRow1-GRow1, \
+                 GRow1, GRow1-GRow1+Width)</l>
+<l>intersection (RegionLinesX, RegionLinesY, GPoints)</l>
+<l>connection (GPoints, GPoints)</l>
+<l>area_center (GPoints, Area3, GRow, GColumn)</l>
+<c>*SortAll**************************************************</c>
+<l>GRows:=[]</l>
+<l>GColumns:=[]</l>
+<l>for Index := 0 to (|GColumn|/GridWidth) -1 by 1</l>
+<l>    tuple_gen_sequence (0, GridWidth-1, 1, PerCol)</l>
+<l>    CurrCol:=PerCol+Index*GridWidth</l>
+<l>    tuple_select (GRow, [CurrCol], RR1)</l>
+<l>    tuple_select (GColumn, [CurrCol], CC1)</l>
+<l>    tuple_sort_index (CC1, Indices1)</l>
+<l>    RowSort:=RR1[Indices1]</l>
+<l>    ColSort:=CC1[Indices1]</l>
+<c>    *</c>
+<l>    GRows:=[GRows,RowSort]</l>
+<l>    GColumns:=[GColumns,ColSort]</l>
+<l>    dev_display (XF)</l>
+<c>    </c>
+<l>*     for Index1 := 0 to |RowSort| -1 by 1    </l>
+<l>*         R:=RowSort[Index1]</l>
+<l>*         C:=ColSort[Index1]</l>
+<l>*         gen_circle (Circle0, R, C, 50)</l>
+<l>*         dev_display (Circle0)</l>
+<l>*         stop ()</l>
+<l>*         wait_seconds (0.01)</l>
+<l>*     endfor</l>
+<l>*     stop ()</l>
+<l>endfor</l>
+<l>MapWidth:=max(GColumn)+1</l>
+<l>MapHeight:=max(GRow)+1</l>
+<c></c>
+<l>MapWidth:=max(GColumn)+1</l>
+<l>MapHeight:=max(GRow)+1</l>
+<l>* vector_to_proj_hom_mat2d (RowSortAll,ColSortAll, GRow+2500, GColumn+1000, 'normalized_dlt',\
+                          [], [], [], [], [], [], HomMat2D, Covariance)</l>
+<l>* vector_to_proj_hom_mat2d_distortion (RowSortAll,ColSortAll,GRow+3500,GColumn+1500,\
+                                     [], [], [], [], [], [], \
+                                     16000, 16000, 'gold_standard', HomMat2D1, Kappa, Error)</l>
+<l>* projective_trans_image_size (XF, TransImage1, HomMat2D1, 'bilinear', 16000, 16000, 'false')</l>
+<l>* compose3 (XF, XF, TransImage1, MultiChannelImage1)</l>
+<c></c>
+<l>hom_vector_to_proj_hom_mat2d(RowSortAll,ColSortAll, ColSortAll-ColSortAll+1, \
+GRow+1000, GColumn+1000, GRows-GRows+1, 'normalized_dlt', HomMat2D)</l>
+<c></c>
+<l>projective_trans_image_size (XF, TransImage, HomMat2D, 'bilinear', 16000, 16000, 'false')</l>
+<l>* stop ()</l>
+<l>compose3 (XF, XF, TransImage, MultiChannelImage)</l>
+<l>* dev_display (XF)</l>
+<l>* dev_display (TransImage)</l>
+<l>* stop ()</l>
+<l>return ()</l>
+</body>
+<docu id="GenHomByDotPattern0623">
+<parameters>
+<parameter id="GridSpace"/>
+<parameter id="GridWidth"/>
+<parameter id="HomMat2D"/>
+<parameter id="Map1"/>
+<parameter id="XF"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>
